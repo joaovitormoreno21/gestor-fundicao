@@ -55,7 +55,7 @@ tr:hover td{background:#f8f7f4}
 <header>
   <div>
     <h1><i class="ti ti-flame" style="color:#ef9f27;font-size:20px;" aria-hidden="true"></i>Gestor Fundição Moreno</h1>
-    <div class="hsub">Dados atualizados em: <strong style="color:#d3d1c7">18/05/2026</strong> &nbsp;|&nbsp; 3225 itens na carteira ativa</div>
+    <div class="hsub">Dados atualizados em: <strong style="color:#d3d1c7">18/05/2026</strong> &nbsp;|&nbsp; <span id="h-total">—</span> itens na carteira ativa</div>
   </div>
   <div style="font-size:11px;color:#888780;text-align:right;">
     Para atualizar rode <strong style="color:#d3d1c7">atualizar.py</strong><br>e recarregue esta página (F5)
@@ -65,14 +65,15 @@ tr:hover td{background:#f8f7f4}
 <div class="container">
 
   <div class="kpi-grid">
-    <div class="kpi info"><div class="klabel">Total de itens</div><div class="kval">3225</div><div class="ksub">carteira ativa</div></div>
-    <div class="kpi ok"><div class="klabel">Fundidos</div><div class="kval">205</div><div class="ksub">6% da carteira</div></div>
-    <div class="kpi danger"><div class="klabel">Atrasados / Críticos</div><div class="kval">2788</div><div class="ksub">atenção imediata</div></div>
-    <div class="kpi info"><div class="klabel">Peso líquido total</div><div class="kval">9588 t</div><div class="ksub">9,588,497 kg</div></div>
+    <div class="kpi info"><div class="klabel">Total de itens</div><div class="kval" id="k-total">—</div><div class="ksub">carteira filtrada</div></div>
+    <div class="kpi ok"><div class="klabel">Fundidos</div><div class="kval" id="k-fundidos">—</div><div class="ksub" id="k-fundidos-sub">—</div></div>
+    <div class="kpi danger" id="k-alerta-card"><div class="klabel">Atrasados / Críticos</div><div class="kval" id="k-alerta">—</div><div class="ksub">atenção imediata</div></div>
+    <div class="kpi info"><div class="klabel">Peso bruto total</div><div class="kval" id="k-peso-bruto">—</div><div class="ksub" id="k-peso-bruto-sub">—</div></div>
   </div>
 
   <div class="filters">
     <span style="font-size:11px;color:#5f5e5a;"><i class="ti ti-filter" style="font-size:13px;vertical-align:-2px;" aria-hidden="true"></i> Filtros:</span>
+    <select id="f-ano"><option value="">Todos os anos</option></select>
     <select id="f-status"><option value="">Todos os status</option></select>
     <select id="f-grupo"><option value="">Todos os grupos</option></select>
     <select id="f-cliente"><option value="">Todos os clientes</option></select>
@@ -84,14 +85,14 @@ tr:hover td{background:#f8f7f4}
 
   <div class="row3">
     <div class="card">
-      <div class="ctitle">Peso líquido por semana de fusão (toneladas)</div>
+      <div class="ctitle">Peso bruto por semana de fusão (toneladas)</div>
       <div class="legrow">
         <span><span class="ldot" style="background:#185fa5"></span>Fundido</span>
         <span><span class="ldot" style="background:#97c459"></span>No prazo</span>
         <span><span class="ldot" style="background:#ef9f27"></span>Atenção</span>
         <span><span class="ldot" style="background:#e24b4a"></span>Atrasado</span>
       </div>
-      <div class="cwrap tall"><canvas id="cS" role="img" aria-label="Peso líquido por semana"></canvas></div>
+      <div class="cwrap tall"><canvas id="cS" role="img" aria-label="Peso bruto por semana"></canvas></div>
     </div>
     <div class="card">
       <div class="ctitle">Por grupo de material</div>
@@ -123,7 +124,7 @@ tr:hover td{background:#f8f7f4}
           <th onclick="srt('prz_fund')">Prz. Fund.</th>
           <th onclick="srt('prz_cont')">Prz. Cont.</th>
           <th onclick="srt('dias')">Dias</th>
-          <th onclick="srt('peso_liq')">Peso Líq. (kg)</th>
+          <th onclick="srt('peso_brt')">Peso Bruto (kg)</th>
           <th onclick="srt('etapa')">Etapa Atual</th>
           <th onclick="srt('status')">Status</th>
         </tr></thead>
@@ -144,14 +145,28 @@ const DATA={"records": [{"os": 9000, "item": 724, "chave": "9000-724", "cliente"
 const ALL=DATA.records;
 let fil=[...ALL],sk='os',sd=1,p=1;
 const PP=30;
+const DEFAULT_YEAR='2026';
 const fmt=n=>n!=null?Number(n).toLocaleString('pt-BR'):'-';
+let chartSemana=null, chartGrupo=null, chartStatus=null;
+
+function anoSemana(r){
+  const s=String(r.semana||'');
+  return s.length>=4?s.slice(0,4):'';
+}
 
 function popF(){
-  const add=(id,vals)=>{
+  const add=(id,vals,defaultValue='')=>{
     const el=document.getElementById(id);
-    [...new Set(vals.filter(Boolean))].sort().forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;el.appendChild(o);});
+    [...new Set(vals.filter(Boolean))].sort().forEach(v=>{
+      const o=document.createElement('option');
+      o.value=v;
+      o.textContent=v;
+      el.appendChild(o);
+    });
+    if(defaultValue && [...el.options].some(o=>o.value===defaultValue)) el.value=defaultValue;
     el.addEventListener('change',applyF);
   };
+  add('f-ano',ALL.map(anoSemana),DEFAULT_YEAR);
   add('f-status',ALL.map(r=>r.status));
   add('f-grupo',ALL.map(r=>r.grupo));
   add('f-cliente',ALL.map(r=>r.cliente));
@@ -160,12 +175,14 @@ function popF(){
 }
 
 function applyF(){
+  const an=document.getElementById('f-ano').value;
   const st=document.getElementById('f-status').value;
   const gr=document.getElementById('f-grupo').value;
   const cl=document.getElementById('f-cliente').value;
   const sm=document.getElementById('f-semana').value;
   const q=document.getElementById('f-search').value.toLowerCase();
   fil=ALL.filter(r=>{
+    if(an&&anoSemana(r)!==an)return false;
     if(st&&r.status!==st)return false;
     if(gr&&r.grupo!==gr)return false;
     if(cl&&r.cliente!==cl)return false;
@@ -173,13 +190,18 @@ function applyF(){
     if(q&&!(`${r.os} ${r.chave} ${r.descricao} ${r.cliente} ${r.material}`).toLowerCase().includes(q))return false;
     return true;
   });
-  p=1;renderT();
+  p=1;
+  renderT();
+  renderKpis();
+  charts();
   document.getElementById('clabel').textContent=`${fil.length} de ${ALL.length} itens`;
 }
 
 function resetF(){
   ['f-status','f-grupo','f-cliente','f-semana'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('f-search').value='';applyF();
+  document.getElementById('f-ano').value=DEFAULT_YEAR;
+  document.getElementById('f-search').value='';
+  applyF();
 }
 
 const BC={'Fundido':'b-fundido','No Prazo':'b-noprazo','Atencao':'b-atencao','Critico':'b-critico','Atrasado':'b-atrasado'};
@@ -187,6 +209,22 @@ const BI={'Fundido':'✓ ','No Prazo':'◷ ','Atrasado':'⚠ ','Critico':'🔥 '
 const bdg=s=>`<span class="badge ${BC[s]||'b-semprazo'}">${BI[s]||''}${s}</span>`;
 
 function srt(k){if(sk===k)sd*=-1;else{sk=k;sd=1;}renderT();}
+
+function renderKpis(){
+  const total=fil.length;
+  const fundidos=fil.filter(r=>r.status==='Fundido').length;
+  const alerta=fil.filter(r=>r.status==='Atrasado'||r.status==='Critico').length;
+  const pesoBruto=fil.reduce((s,r)=>s+(Number(r.peso_brt)||0),0);
+
+  document.getElementById('h-total').textContent=total;
+  document.getElementById('k-total').textContent=fmt(total);
+  document.getElementById('k-fundidos').textContent=fmt(fundidos);
+  document.getElementById('k-fundidos-sub').textContent=`${total?Math.round(fundidos/total*100):0}% da carteira filtrada`;
+  document.getElementById('k-alerta').textContent=fmt(alerta);
+  document.getElementById('k-alerta-card').className='kpi '+(alerta>0?'danger':'ok');
+  document.getElementById('k-peso-bruto').textContent=`${Math.round(pesoBruto/1000).toLocaleString('pt-BR')} t`;
+  document.getElementById('k-peso-bruto-sub').textContent=`${Math.round(pesoBruto).toLocaleString('pt-BR')} kg`;
+}
 
 function renderT(){
   const sorted=[...fil].sort((a,b)=>{
@@ -208,12 +246,12 @@ function renderT(){
       <td style="font-size:11px;">${r.prz_fund}</td>
       <td style="font-size:11px;">${r.prz_cont}</td>
       <td style="text-align:right;${dc}">${r.dias!=null?r.dias+'d':'-'}</td>
-      <td style="text-align:right;">${fmt(r.peso_liq)}</td>
+      <td style="text-align:right;">${fmt(r.peso_brt)}</td>
       <td style="font-size:11px;color:#5f5e5a;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${r.etapa}">${r.etapa}</td>
       <td>${bdg(r.status)}</td>
     </tr>`;
   }).join('');
-  const pages=Math.ceil(fil.length/PP);
+  const pages=Math.max(1,Math.ceil(fil.length/PP));
   document.getElementById('tcnt').textContent=fil.length;
   document.getElementById('pinf').textContent=`Pág. ${p} de ${pages}`;
   document.getElementById('bpv').disabled=p<=1;
@@ -221,25 +259,50 @@ function renderT(){
 }
 function gp(d){p+=d;renderT();}
 
+function destroyCharts(){
+  [chartSemana,chartGrupo,chartStatus].forEach(c=>{if(c)c.destroy();});
+  chartSemana=chartGrupo=chartStatus=null;
+}
+
+function agrupar(lista,campo){
+  return lista.reduce((acc,r)=>{
+    const k=r[campo]||'Sem informação';
+    if(!acc[k])acc[k]={key:k,itens:0,peso_liq:0,peso_brt:0,status:{}};
+    acc[k].itens+=1;
+    acc[k].peso_liq+=Number(r.peso_liq)||0;
+    acc[k].peso_brt+=Number(r.peso_brt)||0;
+    acc[k].status[r.status]=(acc[k].status[r.status]||0)+1;
+    return acc;
+  },{});
+}
+
 function charts(){
-  const semanas=DATA.semana_stats.sort((a,b)=>a.semana_fusao-b.semana_fusao);
-  const labels=semanas.map(s=>'S'+String(s.semana_fusao).slice(4));
+  destroyCharts();
+
+  const semanas=Object.values(agrupar(fil,'semana'))
+    .filter(e=>e.key&&e.key!=='Sem informação')
+    .sort((a,b)=>Number(a.key)-Number(b.key));
+
+  const labels=semanas.map(s=>String(s.key).slice(4)); // sem o "S"
   const byS={};
-  ALL.forEach(r=>{
-    const k=String(r.semana);if(!byS[k])byS[k]={f:0,p:0,w:0,a:0};
-    const kg=(r.peso_liq||0)/1000;
-    if(r.status==='Fundido')byS[k].f+=kg;
-    else if(r.status==='No Prazo')byS[k].p+=kg;
-    else if(r.status==='Atrasado'||r.status==='Critico')byS[k].a+=kg;
-    else byS[k].w+=kg;
-  });
-  new Chart(document.getElementById('cS'),{
+  fil.forEach(r=>{
+    const k=String(r.semana||'');
+    if(!k)return;
+    if(!byS[k])byS[k]={f:0,p:0,w:0,a:0};
+    const ton=(Number(r.peso_brt)||0)/1000;
+    if(r.status==='Fundido')byS[k].f+=ton;
+    else if(r.status==='No Prazo')byS[k].p+=ton;
+    else if(r.status==='Atrasado'||r.status==='Critico')byS[k].a+=ton;
+    else byS[k].w+=ton;
+  }});
+
+  chartSemana=new Chart(document.getElementById('cS'),{
     type:'bar',
     data:{labels,datasets:[
-      {label:'Fundido', data:semanas.map(s=>+((byS[String(s.semana_fusao)]?.f||0)).toFixed(1)),backgroundColor:'#185fa5',borderWidth:0},
-      {label:'No Prazo',data:semanas.map(s=>+((byS[String(s.semana_fusao)]?.p||0)).toFixed(1)),backgroundColor:'#97c459',borderWidth:0},
-      {label:'Atenção', data:semanas.map(s=>+((byS[String(s.semana_fusao)]?.w||0)).toFixed(1)),backgroundColor:'#ef9f27',borderWidth:0},
-      {label:'Atrasado',data:semanas.map(s=>+((byS[String(s.semana_fusao)]?.a||0)).toFixed(1)),backgroundColor:'#e24b4a',borderWidth:0},
+      {label:'Fundido', data:semanas.map(s=>+((byS[String(s.key)]?.f||0)).toFixed(1)),backgroundColor:'#185fa5',borderWidth:0},
+      {label:'No Prazo',data:semanas.map(s=>+((byS[String(s.key)]?.p||0)).toFixed(1)),backgroundColor:'#97c459',borderWidth:0},
+      {label:'Atenção', data:semanas.map(s=>+((byS[String(s.key)]?.w||0)).toFixed(1)),backgroundColor:'#ef9f27',borderWidth:0},
+      {label:'Atrasado',data:semanas.map(s=>+((byS[String(s.key)]?.a||0)).toFixed(1)),backgroundColor:'#e24b4a',borderWidth:0},
     ]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
       scales:{
@@ -248,24 +311,27 @@ function charts(){
       }
     }
   });
+
   const gc=['#185fa5','#3b6d11','#ba7517','#d4537e','#1d9e75','#d85a30','#634ab7','#5f5e5a','#639922','#e24b4a'];
-  const ge=DATA.grupo_stats.sort((a,b)=>b.metal-a.metal);
-  new Chart(document.getElementById('cG'),{type:'doughnut',
-    data:{labels:ge.map(e=>e.grupo),datasets:[{data:ge.map(e=>Math.round(e.metal/1000)),backgroundColor:gc,borderWidth:2,borderColor:'#fff'}]},
+  const ge=Object.values(agrupar(fil,'grupo')).sort((a,b)=>b.peso_brt-a.peso_brt);
+  chartGrupo=new Chart(document.getElementById('cG'),{type:'doughnut',
+    data:{labels:ge.map(e=>e.key),datasets:[{data:ge.map(e=>Math.round(e.peso_brt/1000)),backgroundColor:gc,borderWidth:2,borderColor:'#fff'}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'60%'}
   });
   document.getElementById('lG').innerHTML='<div style="display:flex;flex-wrap:wrap;gap:5px;">'+
-    ge.map((e,i)=>`<span style="display:flex;align-items:center;gap:3px;font-size:10px;color:#5f5e5a"><span style="width:8px;height:8px;border-radius:2px;background:${gc[i]}"></span>${e.grupo}</span>`).join('')+'</div>';
+    ge.map((e,i)=>`<span style="display:flex;align-items:center;gap:3px;font-size:10px;color:#5f5e5a"><span style="width:8px;height:8px;border-radius:2px;background:${gc[i%gc.length]}"></span>${e.key}</span>`).join('')+'</div>';
+
   const sc={'Fundido':'#185fa5','No Prazo':'#97c459','Atrasado':'#e24b4a','Critico':'#ef9f27','Atencao':'#ba7517','Sem Prazo':'#888780'};
-  const se=Object.entries(DATA.status_counts).sort((a,b)=>b[1]-a[1]);
-  new Chart(document.getElementById('cSt'),{type:'doughnut',
+  const statusCounts=fil.reduce((acc,r)=>{acc[r.status]=(acc[r.status]||0)+1;return acc;},{});
+  const se=Object.entries(statusCounts).sort((a,b)=>b[1]-a[1]);
+  chartStatus=new Chart(document.getElementById('cSt'),{type:'doughnut',
     data:{labels:se.map(e=>e[0]),datasets:[{data:se.map(e=>e[1]),backgroundColor:se.map(e=>sc[e[0]]||'#888'),borderWidth:2,borderColor:'#fff'}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'60%'}
   });
   document.getElementById('lSt').innerHTML='<div style="display:flex;flex-wrap:wrap;gap:5px;">'+
     se.map(e=>`<span style="display:flex;align-items:center;gap:3px;font-size:10px;color:#5f5e5a"><span style="width:8px;height:8px;border-radius:2px;background:${sc[e[0]]||'#888'}"></span>${e[0]} (${e[1]})</span>`).join('')+'</div>';
 }
-popF();applyF();charts();
+popF();applyF();
 </script>
 </body>
 </html>

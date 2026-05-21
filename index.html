@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gestor Fundição — 20/05/2026 21:27</title>
+<title>Gestor Fundição — 20/05/2026 21:48</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -79,7 +79,7 @@ tr:hover td{background:#f8f7f4}
 <header>
   <div>
     <h1><i class="ti ti-flame" style="color:#ef9f27;font-size:20px;" aria-hidden="true"></i>Gestor Fundição Moreno</h1>
-    <div class="hsub">Dados atualizados em: <strong style="color:#d3d1c7">20/05/2026 21:27</strong></div>
+    <div class="hsub">Dados atualizados em: <strong style="color:#d3d1c7">20/05/2026 21:48</strong></div>
   </div>
 </header>
 
@@ -828,29 +828,23 @@ function charts(){
 popF();applyF();applyFMp();
 
 // ═══════════════════════════════════════════════════════════════════════════
-// SISTEMA DE OBSERVAÇÕES - GOOGLE SHEETS
+// SISTEMA DE OBSERVAÇÕES - GOOGLE APPS SCRIPT
 // ═══════════════════════════════════════════════════════════════════════════
-const SHEET_ID = '1X-AAOt9cuOqQUHgXx8PB5oAodqwYMXWXVUAbiFv-6W8';
-const SHEET_NAME = 'Observacoes_Fundicao';
-const API_KEY = 'AIzaSyBaYzcKoiydAw-725CiNHtdleL7cC0spxs'; // Você vai me passar depois
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzLZistVHMvdnOGlGRcKXHurBfy-4vBKjyiksLruyLyTOiSfMdKI8PGgQSrtIRnkBWFNg/exec';
 
 let observacoesCache = {};
 
-// Carregar observações do Google Sheets
+// Carregar observações do Google Sheets via Apps Script
 async function carregarObservacoes() {
   try {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A:F?key=${API_KEY}`;
-    const response = await fetch(url);
-    const data = await response.json();
+    const response = await fetch(APPS_SCRIPT_URL);
+    const result = await response.json();
     
-    if (!data.values) return;
-    
-    // Pular header (primeira linha)
-    const rows = data.values.slice(1);
+    if (!result.success || !result.data) return;
     
     // Agrupar por chave
     observacoesCache = {};
-    rows.forEach(row => {
+    result.data.forEach(row => {
       const [timestamp, chave, codigo, sequencia, usuario, observacao] = row;
       if (!chave) return;
       
@@ -871,33 +865,29 @@ async function carregarObservacoes() {
   }
 }
 
-// Salvar observação no Google Sheets
+// Salvar observação no Google Sheets via Apps Script
 async function salvarObservacao(chave, codigo, sequencia, observacao) {
   try {
     const timestamp = new Date().toLocaleString('pt-BR');
     const usuario = 'João'; // Pode melhorar depois para pegar usuário do Windows
     
-    const values = [[
+    const payload = {
       timestamp,
       chave,
-      codigo || '',
-      sequencia || '',
+      codigo: codigo || '',
+      sequencia: sequencia || '',
       usuario,
       observacao
-    ]];
+    };
     
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A:F:append?valueInputOption=RAW&key=${API_KEY}`;
-    
-    const response = await fetch(url, {
+    const response = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
+      mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ values })
+      body: JSON.stringify(payload)
     });
     
-    if (!response.ok) {
-      throw new Error('Erro ao salvar');
-    }
-    
+    // Com mode: 'no-cors', não conseguimos ler a resposta, mas a requisição foi enviada
     // Atualizar cache local
     if (!observacoesCache[chave]) {
       observacoesCache[chave] = [];
@@ -938,7 +928,7 @@ function abrirObservacoes(chave, codigo, sequencia, aba) {
   // Histórico
   if (obs.length > 0) {
     html += '<div style="margin-bottom:20px"><h4 style="color:#5f5e5a;font-size:12px;text-transform:uppercase;margin-bottom:8px">Histórico</h4>';
-    obs.reverse().forEach(o => {
+    obs.slice().reverse().forEach(o => {
       html += `
         <div style="background:#f9f8f6;padding:12px;border-radius:6px;margin-bottom:8px;border-left:3px solid #185fa5">
           <div style="display:flex;justify-content:space-between;margin-bottom:4px">
@@ -987,6 +977,8 @@ async function salvarNovaObs(chave, codigo, sequencia) {
     // Fechar modal
     document.querySelector('[style*=fixed]').remove();
     alert('✅ Observação salva com sucesso!');
+    // Recarregar observações após 1 segundo
+    setTimeout(carregarObservacoes, 1000);
   }
 }
 

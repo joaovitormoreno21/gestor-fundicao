@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gestor Fundição — 20/05/2026 22:03</title>
+<title>Gestor Fundição — 20/05/2026 22:11</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -79,7 +79,7 @@ tr:hover td{background:#f8f7f4}
 <header>
   <div>
     <h1><i class="ti ti-flame" style="color:#ef9f27;font-size:20px;" aria-hidden="true"></i>Gestor Fundição Moreno</h1>
-    <div class="hsub">Dados atualizados em: <strong style="color:#d3d1c7">20/05/2026 22:03</strong></div>
+    <div class="hsub">Dados atualizados em: <strong style="color:#d3d1c7">20/05/2026 22:11</strong></div>
   </div>
 </header>
 
@@ -833,6 +833,7 @@ popF();applyF();applyFMp();
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzLZistVHMvdnOGlGRcKXHurBfy-4vBKjyiksLruyLyTOiSfMdKI8PGgQSrtIRnkBWFNg/exec';
 
 let observacoesCache = {};
+let observacoesCarregadas = false;
 
 // Carregar observações do Google Sheets via Apps Script
 async function carregarObservacoes() {
@@ -860,6 +861,8 @@ async function carregarObservacoes() {
         observacao
       });
     });
+    
+    observacoesCarregadas = true;
   } catch (err) {
     console.error('Erro ao carregar observações:', err);
   }
@@ -913,17 +916,16 @@ async function salvarObservacao(chave, codigo, sequencia, observacao) {
 
 // Abrir modal de observações
 async function abrirObservacoes(chave, codigo, sequencia, aba) {
-  // Mostrar loading
-  const loading = document.createElement('div');
-  loading.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999';
-  loading.innerHTML = '<div style="background:white;padding:20px;border-radius:8px;color:#5f5e5a">Carregando observações...</div>';
-  document.body.appendChild(loading);
-  
-  // Recarregar observações do Google Sheets
-  await carregarObservacoes();
-  
-  // Remover loading
-  loading.remove();
+  // Se ainda não carregou as observações, carregar agora
+  if (!observacoesCarregadas) {
+    const loading = document.createElement('div');
+    loading.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999';
+    loading.innerHTML = '<div style="background:white;padding:20px;border-radius:8px;color:#5f5e5a">⏳ Carregando observações...</div>';
+    document.body.appendChild(loading);
+    
+    await carregarObservacoes();
+    loading.remove();
+  }
   
   const obs = observacoesCache[chave] || [];
   
@@ -992,12 +994,10 @@ async function salvarNovaObs(chave, codigo, sequencia) {
     // Fechar modal
     document.querySelector('[style*=fixed]').remove();
     alert('✅ Observação salva com sucesso!');
-    // Recarregar observações após 1 segundo
-    setTimeout(carregarObservacoes, 1000);
   }
 }
 
-// Carregar observações ao iniciar
+// Carregar observações ao iniciar (em background, sem bloquear)
 carregarObservacoes();
 </script>
 </body>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gestor Fundição — 10/06/2026 22:55</title>
+<title>Gestor Fundição — 10/06/2026 23:00</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -80,7 +80,7 @@ tr:hover td{background:#f8f7f4}
 <header>
   <div>
     <h1><i class="ti ti-flame" style="color:#ef9f27;font-size:20px;" aria-hidden="true"></i>Gestor Fundição Moreno</h1>
-    <div class="hsub">Dados atualizados em: <strong style="color:#d3d1c7">10/06/2026 22:55</strong></div>
+    <div class="hsub">Dados atualizados em: <strong style="color:#d3d1c7">10/06/2026 23:00</strong></div>
   </div>
 </header>
 
@@ -665,12 +665,6 @@ function orcSalvar(){
 
 document.getElementById('orc-modal')?.addEventListener('click',function(e){ if(e.target===this) orcFecharModal(); });
 
-// Inicializar quando aba for aberta
-const _origSwitch=window.switchTab;
-window.switchTab=function(tab){
-  _origSwitch(tab);
-  if(tab==='orcamentos'){ orcRender(); }
-};
 let gerFil=[...GER], tabFil=[...TAB.filter(r=>!r.expedida)], acompFil=[...ACOMP.filter(r=>!r.expedida)], mpFil=[...MP];
 let sk='os', sd=1, p=1, pAcomp=1, pMp=1, skA='os', sdA=1, skMp='total', sdMp=1;
 const PP=30, DEFAULT_YEAR='2026';
@@ -1780,12 +1774,15 @@ function renderizarFaturamento() {
   renderizarFaturamentoAll(true);
 }
 
-// Renderizar faturamento quando trocar para a aba
+// Renderizar faturamento e orçamentos quando trocar para a aba
 const originalSwitchTab = window.switchTab;
 window.switchTab = function(tab) {
   originalSwitchTab(tab);
   if (tab === 'faturamento') {
     renderizarFaturamento();
+  }
+  if (tab === 'orcamentos') {
+    orcRender();
   }
 };
 </script>

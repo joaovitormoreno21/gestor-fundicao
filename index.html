@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gestor Fundição — 10/06/2026 23:24</title>
+<title>Gestor Fundição — 10/06/2026 23:36</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -80,7 +80,7 @@ tr:hover td{background:#f8f7f4}
 <header>
   <div>
     <h1><i class="ti ti-flame" style="color:#ef9f27;font-size:20px;" aria-hidden="true"></i>Gestor Fundição Moreno</h1>
-    <div class="hsub">Dados atualizados em: <strong style="color:#d3d1c7">10/06/2026 23:24</strong></div>
+    <div class="hsub">Dados atualizados em: <strong style="color:#d3d1c7">10/06/2026 23:36</strong></div>
   </div>
 </header>
 
@@ -404,16 +404,16 @@ tr:hover td{background:#f8f7f4}
             <input type="date" id="orc-m-prazo-pcp" readonly style="width:100%;border:.5px solid rgba(0,0,0,.12);border-radius:8px;padding:7px 10px;font-size:13px;background:#f5f4f0;color:#888780;outline:none;">
           </div>
         </div>
-        <div id="orc-m-usinagem-box" style="display:none;background:rgba(24,95,165,.07);border:.5px solid rgba(24,95,165,.25);border-radius:8px;padding:10px 14px;margin-bottom:10px;font-size:12px;color:#185fa5;">
-          <strong>⚙ Item com usinagem</strong> — há dois prazos: Prazo de Fundição e Prazo Contratual (entrega final ao cliente).
+        <div id="orc-m-usinagem-box" style="display:none;background:rgba(24,95,165,.07);border:.5px solid rgba(24,95,165,.25);border-radius:8px;padding:8px 14px;margin-bottom:10px;font-size:12px;color:#185fa5;">
+          ⚙ Item com usinagem
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px;">
           <div>
-            <div style="font-size:10px;font-weight:600;color:#5f5e5a;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Prazo Fund. aberto pelo Comercial</div>
+            <div style="font-size:10px;font-weight:600;color:#5f5e5a;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Prazo Comercial Fund.</div>
             <input type="date" id="orc-m-prazo-fund" style="width:100%;border:.5px solid rgba(0,0,0,.22);border-radius:8px;padding:7px 10px;font-size:13px;outline:none;" oninput="orcPreview()">
           </div>
           <div>
-            <div style="font-size:10px;font-weight:600;color:#5f5e5a;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Prazo Contratual aberto pelo Comercial</div>
+            <div style="font-size:10px;font-weight:600;color:#5f5e5a;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;">Prazo Contratual</div>
             <input type="date" id="orc-m-prazo-cont" style="width:100%;border:.5px solid rgba(0,0,0,.22);border-radius:8px;padding:7px 10px;font-size:13px;outline:none;" oninput="orcPreview()">
           </div>
         </div>
@@ -500,7 +500,7 @@ function orcFmtData(d){
 
 function orcCalcStatus(pcp,fund){
   if(!pcp||!fund) return 'PENDENTE';
-  return orcDiffDias(pcp,fund)<=0?'OK':'DIVERGENTE';
+  return orcDiffDias(pcp,fund)>=0?'OK':'DIVERGENTE';
 }
 
 function orcModeloStatus(r){
@@ -560,7 +560,7 @@ function orcRender(){
     const badgeSt=st==='OK'?'<span style="background:rgba(26,158,92,.1);color:#1a9e5c;border:.5px solid rgba(26,158,92,.3);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;">OK</span>':st==='DIVERGENTE'?'<span style="background:rgba(226,75,74,.1);color:#e24b4a;border:.5px solid rgba(226,75,74,.3);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;">Divergente</span>':'<span style="background:rgba(217,119,6,.1);color:#d97706;border:.5px solid rgba(217,119,6,.25);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;">Pendente</span>';
     const badgeMod=mst==='NA'?'<span style="color:#888780;font-size:11px;">&mdash;</span>':mst==='OK'?'<span style="background:rgba(26,158,92,.1);color:#1a9e5c;border:.5px solid rgba(26,158,92,.3);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;">Recebido</span>':mst==='ATRASO'?'<span style="background:rgba(226,75,74,.1);color:#e24b4a;border:.5px solid rgba(226,75,74,.3);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;">Atrasado</span>':'<span style="background:rgba(124,77,255,.1);color:#7c4dff;border:.5px solid rgba(124,77,255,.3);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;">Aguardando</span>';
     const badgeUsin=r.tem_usinagem?'<span style="background:rgba(24,95,165,.1);color:#185fa5;border:.5px solid rgba(24,95,165,.3);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;">Sim</span>':'<span style="color:#888780;font-size:11px;">&mdash;</span>';
-    const diffHtml=diff===null?'&mdash;':diff===0?'<span style="color:#888780;font-size:11px;">0d</span>':diff<0?'<span style="color:#1a9e5c;font-size:11px;">-'+Math.abs(diff)+'d</span>':'<span style="color:#e24b4a;font-size:11px;">+'+diff+'d</span>';
+    const diffHtml=diff===null?'&mdash;':diff===0?'<span style="color:#888780;font-size:11px;">0d</span>':diff>0?'<span style="color:#1a9e5c;font-size:11px;">+'+diff+'d</span>':'<span style="color:#e24b4a;font-size:11px;">'+diff+'d</span>';
     return '<tr style="'+(naoPreen?'background:#fffdf5;':'')+'">'
       +'<td><strong style="font-size:11px;">'+r.os+'</strong><span style="color:#888780;font-size:10px;"> /'+r.item+'</span></td>'
       +'<td style="font-size:11px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+r.cliente+'">'+r.cliente+'</td>'
@@ -600,8 +600,8 @@ function orcPreview(){
   if(!pcp||!fund){ box.style.display='none'; return; }
   const diff=orcDiffDias(pcp,fund);
   box.style.display='block';
-  if(diff<=0){ box.style.background='rgba(26,158,92,.08)'; box.style.border='.5px solid rgba(26,158,92,.3)'; box.style.color='#1a9e5c'; box.textContent=diff===0?'✓ Datas iguais — sem divergência.':'✓ Comercial abriu prazo de fundição '+Math.abs(diff)+' dia(s) antes do PCP — OK.'; }
-  else{ box.style.background='rgba(226,75,74,.08)'; box.style.border='.5px solid rgba(226,75,74,.3)'; box.style.color='#e24b4a'; box.textContent='⚠ Prazo de fundição do Comercial excede PCP em '+diff+' dia(s) — registrará como DIVERGENTE.'; }
+  if(diff>=0){ box.style.background='rgba(26,158,92,.08)'; box.style.border='.5px solid rgba(26,158,92,.3)'; box.style.color='#1a9e5c'; box.textContent=diff===0?'✓ Datas iguais — conforme.':'✓ Comercial abriu '+diff+' dia(s) depois do PCP — conforme.'; }
+  else{ box.style.background='rgba(226,75,74,.08)'; box.style.border='.5px solid rgba(226,75,74,.3)'; box.style.color='#e24b4a'; box.textContent='⚠ Prazo do Comercial é '+Math.abs(diff)+' dia(s) ANTES do PCP — DIVERGENTE.'; }
 }
 
 function orcToggleModelo(){

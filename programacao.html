@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Programação Fundição — 12/06/2026 21:37</title>
+<title>Programação Fundição — 12/06/2026 21:40</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -152,7 +152,7 @@ select:focus,input:focus{border-color:#185fa5}
   <span class="saving" id="saving-ind">
     <i class="ti ti-loader-2" style="font-size:13px"></i> Salvando...
   </span>
-  <span class="sub">Atualizado em 12/06/2026 21:37 · v2026-06-12-v2-salvamento-robusto</span>
+  <span class="sub">Atualizado em 12/06/2026 21:40 · v2026-06-12-v2-salvamento-robusto</span>
 </div>
 
 <div class="container">
@@ -1194,7 +1194,7 @@ async function _postAppsJson(payload) {
 
 async function _salvarProgramacaoIndividual(payload) {
   // Fallback append-only: usado quando o Apps Script/Sheets falha ao limpar
-  // abas vazias com "Those rows are out of bounds".
+  // abas vazias com "Those rows are out of bounds" ou "Não é possível excluir todas as linhas não congeladas".
   const ts = new Date().toLocaleString('pt-BR');
   const linhas = [];
 
@@ -1239,8 +1239,19 @@ async function _salvarProgramacaoPayload(payload) {
     return await _postAppsJson(lote);
   } catch (err) {
     const msg = String(err && err.message ? err.message : err);
-    if (msg.toLowerCase().includes('out of bounds') || msg.toLowerCase().includes('fora dos limites')) {
-      console.warn('Falha no salvamento em lote. Tentando fallback individual:', msg);
+    const msgLower = msg.toLowerCase();
+    const erroLimpezaSheets = (
+      msgLower.includes('out of bounds') ||
+      msgLower.includes('fora dos limites') ||
+      msgLower.includes('excluir todas as linhas') ||
+      msgLower.includes('linhas não congeladas') ||
+      msgLower.includes('linhas nao congeladas') ||
+      msgLower.includes('non-frozen rows') ||
+      msgLower.includes('frozen rows') ||
+      msgLower.includes('congelad')
+    );
+    if (erroLimpezaSheets) {
+      console.warn('Falha ao limpar a aba no salvamento em lote. Tentando fallback append-only:', msg);
       return await _salvarProgramacaoIndividual(lote);
     }
     throw err;

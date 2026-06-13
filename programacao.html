@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Programação Fundição — 13/06/2026 13:43</title>
+<title>Programação Fundição — 13/06/2026 14:09</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -98,6 +98,72 @@ select:focus,input:focus{border-color:#185fa5}
 .fusao-resumo-card.ok{border-left:3px solid #3b6d11}
 .fusao-resumo-card.warn{border-left:3px solid #ba7517}
 .fusao-resumo-card.err{border-left:3px solid #e24b4a}
+
+.fusao-page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px}
+.fusao-page-head h2{font-size:20px;font-weight:750;margin:0;color:#1a1a18}
+.fusao-page-head p{font-size:12px;color:#6f6e69;margin-top:3px}
+.fusao-toolbar{display:grid;grid-template-columns:180px minmax(180px,240px) minmax(260px,1fr) auto;gap:10px;align-items:end;background:#fff;border:0.5px solid rgba(0,0,0,.1);border-radius:12px;padding:12px;margin-bottom:12px}
+.fusao-field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;color:#5f5e5a;margin-bottom:5px}
+.fusao-field select,.fusao-field input{width:100%;height:34px;border:0.5px solid rgba(0,0,0,.2);border-radius:8px;background:#fff;color:#1a1a18;padding:0 10px;font-size:13px;outline:none}
+.fusao-field select:focus,.fusao-field input:focus{border-color:#185fa5;box-shadow:0 0 0 3px rgba(24,95,165,.10)}
+.fusao-search{position:relative}
+.fusao-search i{position:absolute;left:10px;top:10px;color:#9b9a93}
+.fusao-search input{padding-left:32px}
+.fusao-actions{display:flex;gap:8px;justify-content:flex-end;white-space:nowrap;flex-wrap:wrap}
+.fusao-subtabs{display:flex;gap:6px;margin:10px 0 12px}
+.fusao-subtab{border:0.5px solid rgba(0,0,0,.12);background:#fff;color:#5f5e5a;border-radius:9px;padding:8px 12px;cursor:pointer;font-size:12px;font-weight:650}
+.fusao-subtab.active{background:#1a1a18;color:#fff;border-color:#1a1a18}
+.fusao-view{display:none}
+.fusao-view.active{display:block}
+.fusao-split{display:grid;grid-template-columns:minmax(340px,.9fr) minmax(560px,1.4fr);gap:12px}
+.fusao-panel{background:#fff;border:0.5px solid rgba(0,0,0,.1);border-radius:12px;overflow:hidden}
+.fusao-panel-head{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;border-bottom:0.5px solid rgba(0,0,0,.08);background:#faf9f6;gap:8px}
+.fusao-panel-title{font-size:12px;font-weight:750;text-transform:uppercase;letter-spacing:.05em;color:#1a1a18}
+.fusao-panel-sub{font-size:11px;color:#6f6e69;margin-top:2px}
+.fusao-panel-body{padding:12px;max-height:640px;overflow:auto}
+.fusao-piece-list{display:grid;gap:7px}
+.fusao-piece-card{border:0.5px solid rgba(0,0,0,.10);border-left:4px solid #185fa5;border-radius:9px;padding:9px 10px;background:#fff;cursor:default}
+.fusao-piece-card.no-plan{border-left-color:#ba7517;background:#fffaf2}
+.fusao-piece-card:hover{box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.fpc-top{display:flex;justify-content:space-between;gap:8px;margin-bottom:3px}
+.fpc-code{font-weight:750;color:#1a1a18}
+.fpc-weight{font-weight:750;color:#185fa5;font-size:12px;white-space:nowrap}
+.fpc-desc{color:#5f5e5a;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fpc-meta{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.fusao-tag{font-size:10px;padding:2px 6px;border-radius:12px;background:#f1efe8;color:#555;display:inline-flex;align-items:center;gap:3px}
+.fusao-tag.blue{background:#e8f1fb;color:#185fa5}
+.fusao-tag.green{background:#eaf3de;color:#3b6d11}
+.fusao-tag.amber{background:#faeeda;color:#ba7517}
+.fusao-tag.red{background:#fcebeb;color:#e24b4a}
+.fusao-loads-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.seq-grid{display:grid;grid-template-columns:repeat(6,minmax(220px,1fr));gap:10px;overflow-x:auto;padding-bottom:8px}
+.seq-forno{min-width:220px;background:#fff;border:0.5px solid rgba(0,0,0,.1);border-radius:12px;overflow:hidden}
+.seq-forno-head{padding:10px 11px;background:#1a1a18;color:#fff}
+.seq-forno-name{font-size:13px;font-weight:800}
+.seq-summary{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.seq-mini{background:rgba(255,255,255,.08);border-radius:6px;padding:5px}
+.seq-mini label{display:block;color:#aaa9a2;font-size:9px;text-transform:uppercase}
+.seq-mini strong{font-size:12px}
+.seq-body{padding:9px;display:grid;gap:8px;min-height:420px;background:#faf9f6}
+.seq-card{background:#fff;border:0.5px solid rgba(0,0,0,.10);border-left:4px solid #185fa5;border-radius:9px;padding:9px;cursor:pointer}
+.seq-card.joint{border-left-color:#ba7517;background:#fffaf2}
+.seq-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:6px}
+.seq-num{font-size:11px;color:#5f5e5a;font-weight:700}
+.seq-liga{font-size:14px;font-weight:800;color:#1a1a18}
+.seq-info{font-size:11px;color:#5f5e5a;display:grid;gap:2px;margin-top:5px}
+.seq-actions{display:flex;gap:5px;margin-top:8px}
+.seq-btn{font-size:10px;border:0.5px solid rgba(0,0,0,.12);background:#fff;border-radius:6px;padding:4px 6px;color:#5f5e5a;cursor:pointer}
+.seq-btn:hover{color:#185fa5;border-color:#185fa5}
+.joint-section{margin-top:12px;background:#fff;border:0.5px dashed rgba(186,117,23,.5);border-radius:12px;padding:12px}
+.joint-title{font-size:12px;font-weight:800;color:#ba7517;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em}
+.joint-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.fusao-pend-table{width:100%;border-collapse:collapse;font-size:11px}
+.fusao-pend-table th,.fusao-pend-table td{padding:7px 6px;border-bottom:0.5px solid rgba(0,0,0,.08);text-align:left;vertical-align:top}
+.fusao-pend-table th{font-size:10px;text-transform:uppercase;color:#5f5e5a;background:#faf9f6}
+.fusao-empty{border:1px dashed rgba(0,0,0,.15);border-radius:8px;color:#aaa9a2;font-size:11px;text-align:center;padding:16px 8px;background:#fff}
+@media(max-width:1200px){.fusao-resumo-grid{grid-template-columns:repeat(3,minmax(160px,1fr))}.fusao-toolbar{grid-template-columns:1fr 1fr}.fusao-split{grid-template-columns:1fr}.seq-grid{grid-template-columns:repeat(3,minmax(220px,1fr))}}
+@media(max-width:720px){.fusao-resumo-grid{grid-template-columns:1fr 1fr}.fusao-toolbar{grid-template-columns:1fr}.fusao-actions{justify-content:flex-start}}
+
 .fusao-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1rem}
 .forno-card{background:#fff;border:0.5px solid rgba(0,0,0,.12);border-radius:10px;overflow:hidden}
 .forno-header{padding:10px 14px;background:#f9f8f6;border-bottom:0.5px solid rgba(0,0,0,.08);display:flex;justify-content:space-between;align-items:center}
@@ -176,7 +242,7 @@ select:focus,input:focus{border-color:#185fa5}
   <span class="saving" id="saving-ind">
     <i class="ti ti-loader-2" style="font-size:13px"></i> Salvando...
   </span>
-  <span class="sub">Atualizado em 13/06/2026 13:43 · v2026-06-13-v5-fusao-gerenciamento-cards-carga</span>
+  <span class="sub">Atualizado em 13/06/2026 14:09 · v2026-06-13-v6-layout-fusao-pcp</span>
 </div>
 
 <div class="container">
@@ -229,26 +295,92 @@ select:focus,input:focus{border-color:#185fa5}
 
   <!-- ABA FUSÃO -->
   <div id="tab-fusao" class="tab-content">
-    <div class="filters">
-      <label>Semana:</label>
-      <div class="sem-nav">
-        <button onclick="navSem(-1)">&#8249;</button>
-        <div class="cur" id="sem-fusao-cur">202623</div>
-        <button onclick="navSem(1)">&#8250;</button>
+    <div class="fusao-page-head">
+      <div>
+        <h2>Programação da Fusão</h2>
+        <p>Monte as cargas, acompanhe o saldo da semana e sequencie as corridas por forno.</p>
       </div>
-      <label>Liga:</label>
-      <select id="fil-liga" onchange="renderFusao()"><option value="">Todas</option></select>
-      <button class="btn btn-primary" onclick="abrirNovaCarga()">
-        <i class="ti ti-plus" style="font-size:12px"></i> Nova Carga
+    </div>
+
+    <div class="fusao-toolbar">
+      <div class="fusao-field">
+        <label>Semana de fusão</label>
+        <div class="sem-nav">
+          <button onclick="navSem(-1)">&#8249;</button>
+          <div class="cur" id="sem-fusao-cur">202623</div>
+          <button onclick="navSem(1)">&#8250;</button>
+        </div>
+      </div>
+      <div class="fusao-field">
+        <label>Liga pendente</label>
+        <select id="fil-liga" onchange="renderFusao()"><option value="">Todas</option></select>
+      </div>
+      <div class="fusao-field fusao-search">
+        <label>Busca rápida</label>
+        <i class="ti ti-search"></i>
+        <input type="text" id="fil-fusao-busca" placeholder="Buscar OS, item, código, cliente, descrição ou liga..." oninput="renderFusao()">
+      </div>
+      <div class="fusao-actions">
+        <button class="btn btn-primary" onclick="abrirNovaCarga()">
+          <i class="ti ti-plus" style="font-size:12px"></i> Nova Carga
+        </button>
+        <button class="btn btn-save" onclick="salvarProgramacao()">
+          <i class="ti ti-device-floppy" style="font-size:12px"></i> Salvar Programação
+        </button>
+      </div>
+    </div>
+
+    <div id="fusao-resumo" class="fusao-resumo-grid"></div>
+
+    <div class="fusao-subtabs">
+      <button id="fusao-subtab-montar" class="fusao-subtab active" onclick="switchFusaoView('montar')">
+        <i class="ti ti-stack-push"></i> Montar Cargas
       </button>
-      <button class="btn btn-save" onclick="salvarProgramacao()">
-        <i class="ti ti-device-floppy" style="font-size:12px"></i> Salvar Programação
+      <button id="fusao-subtab-fornos" class="fusao-subtab" onclick="switchFusaoView('fornos')">
+        <i class="ti ti-flame"></i> Sequenciamento por Forno
+      </button>
+      <button id="fusao-subtab-pendentes" class="fusao-subtab" onclick="switchFusaoView('pendentes')">
+        <i class="ti ti-alert-triangle"></i> Peças Pendentes
       </button>
     </div>
-    <div id="fusao-resumo" class="fusao-resumo-grid"></div>
-    <div id="fusao-container" class="fusao-grid"></div>
+
+    <div id="fusao-view-montar" class="fusao-view active">
+      <div class="fusao-split">
+        <div class="fusao-panel">
+          <div class="fusao-panel-head">
+            <div>
+              <div class="fusao-panel-title">Peças disponíveis</div>
+              <div class="fusao-panel-sub">Semana + liga selecionada, ainda fora de carga</div>
+            </div>
+            <span id="fusao-disp-badge" class="fusao-tag blue">0 peças</span>
+          </div>
+          <div class="fusao-panel-body">
+            <div id="fusao-pecas-disponiveis" class="fusao-piece-list"></div>
+          </div>
+        </div>
+        <div class="fusao-panel">
+          <div class="fusao-panel-head">
+            <div>
+              <div class="fusao-panel-title">Cargas formadas</div>
+              <div class="fusao-panel-sub">Clique na carga para ver detalhes, alterar forno ou adicionar peças</div>
+            </div>
+            <span id="fusao-cargas-badge" class="fusao-tag green">0 cargas</span>
+          </div>
+          <div class="fusao-panel-body">
+            <div id="fusao-container" class="fusao-loads-grid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="fusao-view-fornos" class="fusao-view">
+      <div id="fusao-fornos-container"></div>
+    </div>
+
+    <div id="fusao-view-pendentes" class="fusao-view">
+      <div id="fusao-pendentes-container"></div>
+    </div>
   </div>
-</div>
 
 <!-- Menu de contexto do card -->
 <div id="ctx-menu" class="ctx-menu">
@@ -411,7 +543,7 @@ const FORNOS        = [{"id": "f6", "nome": "Forno 6", "min": 1500, "max": 2750}
 const APPS_URL      = 'https://script.google.com/macros/s/AKfycbzLZistVHMvdnOGlGRcKXHurBfy-4vBKjyiksLruyLyTOiSfMdKI8PGgQSrtIRnkBWFNg/exec';
 const SEM_ATUAL     = '202623';
 
-let cargas       = [{"id": "c1781366100893", "forno": "f10", "fornos": ["f10"], "semana": "202624", "liga": "AM-XT610", "pecas": ["27572-1", "27572-2", "27572-3", "27572-4"]}, {"id": "c1781366122453", "forno": "f30", "fornos": ["f30"], "semana": "202624", "liga": "AM-XT610", "pecas": ["27577-1", "27577-2"]}, {"id": "c1781366193621", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-25", "pecas": ["27544-1", "27544-2", "27544-3", "27544-4", "27544-5", "27544-6", "27544-7", "27544-8", "27551-2", "27551-1"]}, {"id": "c1781366251950", "forno": "f10", "fornos": ["f10", "f30"], "semana": "202624", "liga": "AM-25", "pecas": ["27575-4"]}, {"id": "c1781366347975", "forno": "f20", "fornos": ["f20"], "semana": "202624", "liga": "AM-50 Mn N", "pecas": ["27563-14", "27563-15", "27563-16", "27563-17"]}, {"id": "c1781366375375", "forno": "f30", "fornos": ["f30"], "semana": "202624", "liga": "AM-50 Mn N", "pecas": ["27563-18", "27563-19", "27588-1", "27588-2", "27588-3"]}, {"id": "c1781366460672", "forno": "f30", "fornos": ["f30"], "semana": "202624", "liga": "AM-15", "pecas": ["27567-1"]}, {"id": "c1781368254726", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-XT710", "pecas": ["27591-1", "27591-2", "27591-3", "27591-4", "27591-5"]}, {"id": "c1781368276127", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-XT710", "pecas": ["27595-1", "27595-2", "27595-3", "27595-4", "27595-5"]}, {"id": "c1781368286782", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-XT710", "pecas": ["27595-6", "27595-7", "27595-8", "27595-9"]}, {"id": "c1781368333855", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-20 Mn5 MOD.", "pecas": ["27590-1", "27590-2"]}, {"id": "c1781368410991", "forno": "f10", "fornos": ["f10"], "semana": "202624", "liga": "AM-25", "pecas": ["27582-1", "27582-2", "27582-3"]}, {"id": "c1781368427951", "forno": "f30", "fornos": ["f30"], "semana": "202624", "liga": "AM-30", "pecas": ["27598-1"]}, {"id": "c1781368444704", "forno": "f20", "fornos": ["f20"], "semana": "202624", "liga": "AM-30 Mn", "pecas": ["27599-1"]}, {"id": "c1781368454984", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-30 Mn", "pecas": ["27597-1"]}, {"id": "c1781368463024", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-8640T", "pecas": ["27563-5", "27563-7"]}, {"id": "c1781368503505", "forno": "f20", "fornos": ["f20"], "semana": "202624", "liga": "AM-8640T", "pecas": ["27563-8", "27563-9"]}, {"id": "c1781368567490", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-8640T", "pecas": ["27563-4", "27563-6"]}, {"id": "c1781368576322", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-8640T", "pecas": ["27563-11", "27563-13"]}, {"id": "c1781368589370", "forno": "f10", "fornos": ["f10"], "semana": "202624", "liga": "AM-WC6", "pecas": ["27581-1", "27581-2", "27581-3"]}, {"id": "c1781368609090", "forno": "f6", "fornos": ["f6"], "semana": "202624", "liga": "AM-WC6", "pecas": ["27523-1"]}, {"id": "c1781368627051", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-WC6", "pecas": ["27523-2"]}, {"id": "c1781368635323", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-XT710", "pecas": ["27456-19", "27545-14"]}, {"id": "c1781368645659", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-XT720", "pecas": ["27299-6", "27553-10", "27545-3"]}, {"id": "c1781368670515", "forno": "f20", "fornos": ["f20"], "semana": "202624", "liga": "AM-XT720", "pecas": ["27545-4", "27545-5", "27545-16"]}, {"id": "c1781368683252", "forno": "f30", "fornos": ["f30", "f40"], "semana": "202624", "liga": "FM-23 C", "pecas": ["27554-27", "27554-28"]}, {"id": "c1781368699004", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "ITF-056", "pecas": ["27568-1", "27568-2", "27565-2", "27565-1"]}, {"id": "c1781368718076", "forno": "f30", "fornos": ["f30"], "semana": "202624", "liga": "ITF-092", "pecas": ["26970-3"]}, {"id": "c1781368728867", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "SAE 8630", "pecas": ["27583-1"]}];
+let cargas       = [{"id": "c1781366100893", "forno": "f10", "fornos": ["f10"], "semana": "202624", "liga": "AM-XT610", "pecas": ["27572-1", "27572-2", "27572-3", "27572-4"]}, {"id": "c1781366122453", "forno": "f30", "fornos": ["f30"], "semana": "202624", "liga": "AM-XT610", "pecas": ["27577-1", "27577-2"]}, {"id": "c1781366193621", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-25", "pecas": ["27544-1", "27544-2", "27544-3", "27544-4", "27544-5", "27544-6", "27544-7", "27544-8", "27551-2", "27551-1"]}, {"id": "c1781366251950", "forno": "f10", "fornos": ["f10", "f30"], "semana": "202624", "liga": "AM-25", "pecas": ["27575-4"]}, {"id": "c1781366347975", "forno": "f20", "fornos": ["f20"], "semana": "202624", "liga": "AM-50 Mn N", "pecas": ["27563-14", "27563-15", "27563-16", "27563-17"]}, {"id": "c1781366375375", "forno": "f30", "fornos": ["f30"], "semana": "202624", "liga": "AM-50 Mn N", "pecas": ["27563-18", "27563-19", "27588-1", "27588-2", "27588-3"]}, {"id": "c1781366460672", "forno": "f30", "fornos": ["f30"], "semana": "202624", "liga": "AM-15", "pecas": ["27567-1"]}, {"id": "c1781368254726", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-XT710", "pecas": ["27591-1", "27591-2", "27591-3", "27591-4", "27591-5"]}, {"id": "c1781368276127", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-XT710", "pecas": ["27595-1", "27595-2", "27595-3", "27595-4", "27595-5"]}, {"id": "c1781368286782", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-XT710", "pecas": ["27595-6", "27595-7", "27595-8", "27595-9"]}, {"id": "c1781368333855", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-20 Mn5 MOD.", "pecas": ["27590-1", "27590-2"]}, {"id": "c1781368410991", "forno": "f10", "fornos": ["f10"], "semana": "202624", "liga": "AM-25", "pecas": ["27582-1", "27582-2", "27582-3"]}, {"id": "c1781368427951", "forno": "f30", "fornos": ["f30"], "semana": "202624", "liga": "AM-30", "pecas": ["27598-1"]}, {"id": "c1781368444704", "forno": "f20", "fornos": ["f20"], "semana": "202624", "liga": "AM-30 Mn", "pecas": ["27599-1"]}, {"id": "c1781368454984", "forno": "f6", "fornos": ["f6", "f7", "f10", "f20", "f30", "f40"], "semana": "202624", "liga": "AM-30 Mn", "pecas": ["27597-1"]}, {"id": "c1781368463024", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-8640T", "pecas": ["27563-5", "27563-7"]}, {"id": "c1781368503505", "forno": "f20", "fornos": ["f20"], "semana": "202624", "liga": "AM-8640T", "pecas": ["27563-8", "27563-9"]}, {"id": "c1781368567490", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-8640T", "pecas": ["27563-4", "27563-6"]}, {"id": "c1781368576322", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-8640T", "pecas": ["27563-11", "27563-13"]}, {"id": "c1781368589370", "forno": "f10", "fornos": ["f10"], "semana": "202624", "liga": "AM-WC6", "pecas": ["27581-1", "27581-2", "27581-3"]}, {"id": "c1781368609090", "forno": "f6", "fornos": ["f6"], "semana": "202624", "liga": "AM-WC6", "pecas": ["27523-1"]}, {"id": "c1781368627051", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-WC6", "pecas": ["27523-2"]}, {"id": "c1781368635323", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-XT710", "pecas": ["27456-19", "27545-14"]}, {"id": "c1781368645659", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "AM-XT720", "pecas": ["27299-6", "27553-10", "27545-3"]}, {"id": "c1781368670515", "forno": "f20", "fornos": ["f20"], "semana": "202624", "liga": "AM-XT720", "pecas": ["27545-4", "27545-5", "27545-16"]}, {"id": "c1781368683252", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "FM-23 C", "pecas": ["27554-27"]}, {"id": "c1781368699004", "forno": "f20", "fornos": ["f20"], "semana": "202624", "liga": "ITF-056", "pecas": ["27568-1", "27568-2", "27565-2", "27565-1"]}, {"id": "c1781368718076", "forno": "f10", "fornos": ["f10", "f40"], "semana": "202624", "liga": "ITF-092", "pecas": ["26970-3"]}, {"id": "c1781368728867", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "SAE 8630", "pecas": ["27583-1"]}, {"id": "c1781369719204", "forno": "f40", "fornos": ["f40"], "semana": "202624", "liga": "FM-23 C", "pecas": ["27554-28"]}];
 let ordemManual  = {"moldagem|202623": {"27538-5": 999, "27538-6": 999, "27543-1": 999}, "moldagem|202625": {"27579-1": 999, "27523-1": 999, "27581-1": 999, "27581-2": 999, "27581-3": 999, "27584-1": 999, "27584-2": 999, "27593-1": 999, "27598-1": 999, "27299-6": 999, "27567-1": 999, "27563-1": 999, "27563-2": 999, "27563-4": 999, "27583-1": 999}, "fusao_prog|202623": {"27554-7": 999}, "projeto|202623": {"27583-1": 0, "27588-1": 1, "27588-2": 1, "27588-3": 2}, "projeto|202622": {"27554-7": 999, "27544-4": 999, "27544-1": 999, "27544-2": 999, "27544-3": 999, "27544-7": 999, "27544-5": 999, "27544-6": 999, "27544-8": 999, "27559-4": 999, "27559-5": 999, "27559-6": 999, "27559-7": 999, "27559-8": 999, "27559-9": 999, "27545-1": 999, "27456-3": 999, "27457-1": 999, "27545-2": 999, "27545-3": 999, "27545-4": 999, "27545-5": 999, "27545-16": 999, "27554-15": 999, "27554-18": 999, "27559-1": 999, "27559-2": 999, "27554-26": 999, "27538-1": 999, "27538-2": 999, "27538-3": 999, "27538-4": 999, "27538-5": 999, "27538-6": 999, "27543-1": 999}, "ficha_processo|202622": {"27554-7": 999, "27544-4": 999, "27544-1": 999, "27544-2": 999, "27544-3": 999, "27544-7": 999, "27544-5": 999, "27544-6": 999, "27544-8": 999, "27520-1": 999, "27546-1": 999, "27546-2": 999, "27546-3": 999, "27546-4": 999, "27546-5": 999, "27546-6": 999, "27559-4": 999, "27559-5": 999, "27559-6": 999, "27559-7": 999, "27559-8": 999}, "projeto|202624": {"27583-1": 0, "27588-1": 1, "27588-2": 1, "27588-3": 2, "27438-1": 3, "27438-2": 4, "27566-1": 5, "27566-2": 6}, "projeto|202625": {"27438-1": 0, "27438-2": 1}, "fab_modelo|202624": {"27593-1": 0, "27588-1": 1, "27588-2": 2, "27588-3": 3}, "insp_modelo|202624": {"27551-2": 0, "27551-1": 1}};  // {'setor|semana': {'chave': idx}}
 let semFusao     = SEM_ATUAL;
 let modalCargaId = null;
@@ -419,6 +551,7 @@ let modalLiga    = null;
 let editFornosCargaId = null;
 let dragChave    = null;
 let dragSetor    = null;
+let fusaoView    = 'montar';
 
 function _unique(arr) {
   return Array.from(new Set((arr || []).map(x => String(x || '').trim()).filter(Boolean)));
@@ -495,11 +628,17 @@ function atualizarFiltroLigasFusao() {
 function pesoTotalPecas(lista) { return (lista || []).reduce((s,p)=>s+pesoPeca(p),0); }
 function pecasPrevistasFusaoFiltro() {
   const ligaFil = document.getElementById('fil-liga')?.value || '';
-  return PECAS.filter(p => pecaPrevistaFusaoNaSemana(p, semFusao) && (!ligaFil || p.liga === ligaFil));
+  return PECAS.filter(p =>
+    pecaPrevistaFusaoNaSemana(p, semFusao) &&
+    (!ligaFil || p.liga === ligaFil) &&
+    (typeof buscaMatchFusaoPeca !== 'function' || buscaMatchFusaoPeca(p))
+  );
 }
 function cargasFusaoFiltro() {
   const ligaFil = document.getElementById('fil-liga')?.value || '';
-  return (cargas || []).map(c=>normalizarCarga(c)).filter(c => c.semana === semFusao && (!ligaFil || c.liga === ligaFil));
+  return (cargas || []).map(c=>normalizarCarga(c)).filter(c =>
+    c.semana === semFusao && (!ligaFil || c.liga === ligaFil)
+  );
 }
 function pecasPlanejadasFusaoFiltro() {
   const chaves = new Set();
@@ -511,35 +650,48 @@ function renderResumoFusao() {
   if (!el) return;
   const ligaFil = document.getElementById('fil-liga')?.value || '';
   const previstas = pecasPrevistasFusaoFiltro();
-  const planejadas = pecasPlanejadasFusaoFiltro();
+  const planejadas = pecasPlanejadasFusaoFiltro().filter(p => (typeof buscaMatchFusaoPeca !== 'function' || buscaMatchFusaoPeca(p)));
   const chPlanejadas = new Set(planejadas.map(p => p.chave));
   const saldo = previstas.filter(p => !chPlanejadas.has(p.chave));
   const pesoPrev = pesoTotalPecas(previstas);
   const pesoPlan = pesoTotalPecas(planejadas);
   const pesoSaldo = pesoTotalPecas(saldo);
-  const qtdCargas = cargasFusaoFiltro().length;
+  const cargasFiltro = cargasFusaoFiltro().filter(c => typeof buscaMatchFusaoCarga !== 'function' || buscaMatchFusaoCarga(c));
+  const qtdCargas = cargasFiltro.length;
   const pct = pesoPrev ? (pesoPlan / pesoPrev) * 100 : 0;
-  const escopo = ligaFil ? `Liga ${ligaFil}` : 'Todas as ligas';
+  const semPlan = saldo.filter(p => (p.alertas || []).includes('Sem planejamento')).length;
+  const foraFaixa = cargasFiltro.filter(c => { const st = statusCarga(c); return st.cls !== 'green'; }).length;
+  const escopo = ligaFil ? `Liga ${ligaFil}` : 'Todas as ligas pendentes';
   el.innerHTML = `
     <div class="fusao-resumo-card info">
       <div class="lbl">Carga prevista</div>
-      <div class="val">${pesoPrev.toLocaleString('pt-BR')} kg</div>
+      <div class="val">${tonFmt(pesoPrev)}</div>
       <div class="sub">${previstas.length} peça(s) · Semana ${semFusao} · ${escopo}</div>
     </div>
     <div class="fusao-resumo-card ok">
       <div class="lbl">Carga planejada</div>
-      <div class="val">${pesoPlan.toLocaleString('pt-BR')} kg</div>
-      <div class="sub">${planejadas.length} peça(s) em ${qtdCargas} carga(s) · ${pct.toFixed(1).replace('.', ',')}% do previsto</div>
+      <div class="val">${tonFmt(pesoPlan)}</div>
+      <div class="sub">${planejadas.length} peça(s) em ${qtdCargas} carga(s)</div>
     </div>
     <div class="fusao-resumo-card ${pesoSaldo > 0 ? 'warn' : 'ok'}">
       <div class="lbl">Saldo a planejar</div>
-      <div class="val">${pesoSaldo.toLocaleString('pt-BR')} kg</div>
+      <div class="val">${tonFmt(pesoSaldo)}</div>
       <div class="sub">${saldo.length} peça(s) ainda fora de carga</div>
     </div>
-    <div class="fusao-resumo-card ${pesoPlan > pesoPrev && pesoPrev ? 'err' : 'info'}">
-      <div class="lbl">Diferença planejada</div>
-      <div class="val">${(pesoPlan - pesoPrev).toLocaleString('pt-BR')} kg</div>
-      <div class="sub">Planejado menos previsto no filtro atual</div>
+    <div class="fusao-resumo-card info">
+      <div class="lbl">% planejado</div>
+      <div class="val">${pct.toFixed(1).replace('.', ',')}%</div>
+      <div class="sub">Planejado sobre previsto no filtro atual</div>
+    </div>
+    <div class="fusao-resumo-card ${semPlan ? 'warn' : 'ok'}">
+      <div class="lbl">Sem planejamento</div>
+      <div class="val">${semPlan}</div>
+      <div class="sub">Peça(s) com semana no Gerenciamento e sem datas previstas</div>
+    </div>
+    <div class="fusao-resumo-card ${foraFaixa ? 'err' : 'ok'}">
+      <div class="lbl">Cargas fora da faixa</div>
+      <div class="val">${foraFaixa}</div>
+      <div class="sub">Abaixo do mínimo ou acima do máximo</div>
     </div>`;
 }
 
@@ -1037,72 +1189,268 @@ function iniciarDrag(e) {
 }
 
 // ── Render Fusão ─────────────────────────────────────────────────
+function normalizaBusca(txt) {
+  return String(txt || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+function buscaFusao() { return normalizaBusca(document.getElementById('fil-fusao-busca')?.value || ''); }
+function textoBuscaPeca(p) {
+  return normalizaBusca(`${p.os} ${p.item} ${p.chave} ${p.codigo} ${p.seq} ${p.cliente} ${p.desc} ${p.liga} ${p.prz_fund} ${p.prz_cont} ${(p.alertas||[]).join(' ')}`);
+}
+function buscaMatchFusaoPeca(p) {
+  const q = buscaFusao();
+  return !q || textoBuscaPeca(p).includes(q);
+}
+function textoBuscaCarga(c) {
+  const ps = pecasDaCarga(c);
+  return normalizaBusca(`${c.id} ${c.liga} ${c.semana} ${capacidadeCarga(c).nomes} ${ps.map(p => textoBuscaPeca(p)).join(' ')}`);
+}
+function buscaMatchFusaoCarga(c) {
+  const q = buscaFusao();
+  return !q || textoBuscaCarga(c).includes(q);
+}
+function kgFmt(v) { return Number(v || 0).toLocaleString('pt-BR'); }
+function tonFmt(v) { return (Number(v || 0)/1000).toLocaleString('pt-BR', {minimumFractionDigits:1, maximumFractionDigits:1}) + 'T'; }
+function statusCarga(c) {
+  const cap = capacidadeCarga(c);
+  const total = totalCarga(c);
+  if (!cap.max) return {cls:'red', txt:'Sem forno', hint:'Selecione um forno'};
+  if (total > cap.max) return {cls:'red', txt:'Acima', hint:`Excede ${kgFmt(total-cap.max)} kg`};
+  if (total < cap.min) return {cls:'amber', txt:'Abaixo', hint:`Falta ${kgFmt(cap.min-total)} kg mínimo`};
+  return {cls:'green', txt:'OK', hint:'Dentro da faixa'};
+}
+function prazoCriticoCarga(c) {
+  const ps = pecasDaCarga(c);
+  const candidatos = ps.map(p => p.prz_fund || p.prz_cont).filter(Boolean);
+  if (!candidatos.length) return '-';
+  return candidatos.sort((a,b) => (diasPrazo(a) ?? 99999) - (diasPrazo(b) ?? 99999))[0] || '-';
+}
+function pecasDisponiveisFusaoFiltro() {
+  const ligaFil = document.getElementById('fil-liga')?.value || '';
+  return pecasDisponiveisFusaoSemana(semFusao)
+    .filter(p => (!ligaFil || p.liga === ligaFil) && buscaMatchFusaoPeca(p));
+}
+
+// ── Render Fusão ─────────────────────────────────────────────────
 function renderFusao() {
   cargas = (cargas || []).map(c => normalizarCarga(c));
   atualizarFiltroLigasFusao();
   renderResumoFusao();
-  const cargasSem = cargasFusaoFiltro();
+  renderPecasDisponiveisFusao();
+  renderCargasMontagem();
+  renderSequenciamentoFornos();
+  renderPendentesFusao();
+}
+
+function switchFusaoView(view) {
+  fusaoView = view || 'montar';
+  ['montar','fornos','pendentes'].forEach(v => {
+    document.getElementById('fusao-view-' + v)?.classList.toggle('active', v === fusaoView);
+    document.getElementById('fusao-subtab-' + v)?.classList.toggle('active', v === fusaoView);
+  });
+  renderFusao();
+}
+
+function renderPecasDisponiveisFusao() {
+  const lista = pecasDisponiveisFusaoFiltro();
+  const el = document.getElementById('fusao-pecas-disponiveis');
+  const badge = document.getElementById('fusao-disp-badge');
+  if (badge) badge.textContent = `${lista.length} peças · ${tonFmt(pesoTotalPecas(lista))}`;
+  if (!el) return;
+  if (!lista.length) {
+    el.innerHTML = `<div class="fusao-empty">Nenhuma peça disponível para os filtros atuais.<br><span style="font-size:10px">A liga some do filtro quando todas as peças dela já estão em carga.</span></div>`;
+    return;
+  }
+  el.innerHTML = lista.map(p => {
+    const semPlan = (p.alertas || []).includes('Sem planejamento');
+    const alerts = (p.alertas || []).map(a => `<span class="fusao-tag ${a === 'Sem planejamento' ? 'amber' : 'red'}">${a}</span>`).join('');
+    return `<div class="fusao-piece-card ${semPlan ? 'no-plan' : ''}">
+      <div class="fpc-top">
+        <div class="fpc-code">OS ${p.os}-${p.item} · ${p.codigo || '-'}</div>
+        <div class="fpc-weight">${kgFmt(pesoPeca(p))} kg</div>
+      </div>
+      <div class="fpc-desc">${p.desc || '-'} · ${p.cliente || '-'}</div>
+      <div class="fpc-meta">
+        <span class="fusao-tag blue">${p.liga || '-'}</span>
+        <span class="fusao-tag">Sem. ${semanaPrevFusaoPeca(p) || '-'}</span>
+        ${p.prz_fund ? `<span class="fusao-tag">Prazo ${p.prz_fund}</span>` : ''}
+        ${alerts}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderCargasMontagem() {
+  const cargasSem = cargasFusaoFiltro().filter(c => buscaMatchFusaoCarga(c));
+  const badge = document.getElementById('fusao-cargas-badge');
+  if (badge) badge.textContent = `${cargasSem.length} cargas · ${tonFmt(cargasSem.reduce((s,c)=>s+totalCarga(c),0))}`;
+  const el = document.getElementById('fusao-container');
+  if (!el) return;
 
   if (!cargasSem.length) {
-    document.getElementById('fusao-container').innerHTML =
+    el.innerHTML =
       `<div style="grid-column:1/-1;text-align:center;padding:50px;color:#888780">
         <i class="ti ti-flame" style="font-size:32px;display:block;margin:0 auto 8px;opacity:.3"></i>
-        Nenhuma carga para a semana ${semFusao}.
+        Nenhuma carga para a semana ${semFusao} nos filtros atuais.
         <br><button class="btn btn-primary" style="margin-top:12px" onclick="abrirNovaCarga()">
           <i class="ti ti-plus"></i> Criar primeira carga
         </button></div>`;
     return;
   }
 
-  document.getElementById('fusao-container').innerHTML = cargasSem.map(c => {
-    normalizarCarga(c);
-    const cap = capacidadeCarga(c);
-    if (!cap.max) return '';
-    const ps = pecasDaCarga(c);
-    const total = totalCarga(c);
-    const pct = Math.min(100, (total/cap.max)*100);
-    const minPct = cap.max ? (cap.min/cap.max)*100 : 0;
-    const fillCls = total>cap.max?'fill-warn':total<cap.min?'fill-low':'fill-ok';
-    const alertHTML = total<cap.min
-      ? `<div class="alert-box alert-err"><i class="ti ti-alert-triangle" style="font-size:12px"></i>Abaixo do mínimo — faltam ${(cap.min-total).toLocaleString('pt-BR')} kg</div>`
-      : total>cap.max
-      ? `<div class="alert-box alert-err"><i class="ti ti-alert-circle" style="font-size:12px"></i>Excede máximo em ${(total-cap.max).toLocaleString('pt-BR')} kg</div>`
-      : `<div class="alert-box alert-ok"><i class="ti ti-check" style="font-size:12px"></i>Carga dentro da capacidade</div>`;
-    const chips = ps.map(p=>`
-      <div class="peca-chip" title="${p.desc} — ${p.cliente}">
-        <span>OS ${p.os}-${p.item} · ${p.codigo} · ${pesoPeca(p).toLocaleString('pt-BR')}kg</span>
-        <span class="rm" onclick="event.stopPropagation();removerPeca('${c.id}','${p.chave}')">×</span>
-      </div>`).join('');
-    return `<div class="forno-card clickable" onclick="abrirDetalheCarga('${c.id}')">
-      <div class="forno-header">
-        <div>
-          <div class="forno-title">${cap.nomes}</div>
-          <div class="forno-cap">Mín ${cap.min.toLocaleString('pt-BR')} · Máx ${cap.max.toLocaleString('pt-BR')} kg</div>
-          <div class="carga-meta">Semana ${c.semana} · ${ps.length} peça(s)</div>
+  el.innerHTML = cargasSem.map(c => htmlCargaCard(c, false)).join('');
+}
+
+function htmlCargaCard(c, compacto) {
+  normalizarCarga(c);
+  const cap = capacidadeCarga(c);
+  if (!cap.max) return '';
+  const ps = pecasDaCarga(c);
+  const total = totalCarga(c);
+  const pct = Math.min(100, (total/cap.max)*100);
+  const minPct = cap.max ? (cap.min/cap.max)*100 : 0;
+  const fillCls = total>cap.max?'fill-warn':total<cap.min?'fill-low':'fill-ok';
+  const st = statusCarga(c);
+  const chips = compacto ? '' : ps.slice(0,12).map(p=>`
+    <div class="peca-chip" title="${p.desc} — ${p.cliente}">
+      <span>OS ${p.os}-${p.item} · ${p.codigo} · ${kgFmt(pesoPeca(p))}kg</span>
+      <span class="rm" onclick="event.stopPropagation();removerPeca('${c.id}','${p.chave}')">×</span>
+    </div>`).join('');
+  const mais = !compacto && ps.length > 12 ? `<span class="fusao-tag">+${ps.length-12} peças</span>` : '';
+  const alertHTML = st.cls === 'amber'
+    ? `<div class="alert-box alert-err"><i class="ti ti-alert-triangle" style="font-size:12px"></i>${st.hint}</div>`
+    : st.cls === 'red'
+    ? `<div class="alert-box alert-err"><i class="ti ti-alert-circle" style="font-size:12px"></i>${st.hint}</div>`
+    : `<div class="alert-box alert-ok"><i class="ti ti-check" style="font-size:12px"></i>Carga dentro da capacidade</div>`;
+
+  return `<div class="forno-card clickable" onclick="abrirDetalheCarga('${c.id}')">
+    <div class="forno-header">
+      <div>
+        <div class="forno-title">${cap.nomes}</div>
+        <div class="forno-cap">Mín ${kgFmt(cap.min)} · Máx ${kgFmt(cap.max)} kg</div>
+        <div class="carga-meta">Semana ${c.semana} · ${ps.length} peça(s) · Prazo crítico ${prazoCriticoCarga(c)}</div>
+      </div>
+      <div class="card-actions">
+        <span class="fusao-tag ${st.cls}">${st.txt}</span>
+        <span class="liga-tag">${c.liga}</span>
+        <button class="mini-btn" onclick="event.stopPropagation();abrirEditarFornos('${c.id}')">alterar forno</button>
+        <button class="rm-carga" onclick="event.stopPropagation();removerCarga('${c.id}')">remover carga</button>
+      </div>
+    </div>
+    <div class="forno-body">
+      <div class="forno-kg">${kgFmt(total)} <span>kg / ${kgFmt(cap.max)} kg</span></div>
+      <div class="prog-bar-bg">
+        <div class="prog-bar-fill ${fillCls}" style="width:${pct}%"></div>
+        <div class="prog-min-mark" style="left:${minPct}%" title="Mínimo: ${kgFmt(cap.min)}kg"></div>
+      </div>
+      <div class="prog-labels">
+        <span>0</span><span style="color:#185fa5">${kgFmt(cap.min)} (mín)</span><span>${kgFmt(cap.max)}</span>
+      </div>
+      ${alertHTML}
+      ${compacto ? '' : `<div class="forno-pecas">${chips || '<span style="font-size:10px;color:#888780">Nenhuma peça adicionada.</span>'}${mais}</div>`}
+      <button class="add-btn" onclick="event.stopPropagation();abrirModalForno('${c.id}','${c.liga}')">
+        <i class="ti ti-plus" style="font-size:12px"></i> Adicionar peça (${c.liga} · sem. ${c.semana})
+      </button>
+    </div>
+  </div>`;
+}
+
+function renderSequenciamentoFornos() {
+  const el = document.getElementById('fusao-fornos-container');
+  if (!el) return;
+  const cargasBase = cargasFusaoFiltro().filter(c => buscaMatchFusaoCarga(c));
+  const colunas = FORNOS.map(f => {
+    const cs = cargasBase.filter(c => cargaFornosIds(c).includes(f.id));
+    const peso = cs.reduce((s,c)=>s+totalCarga(c),0);
+    const cards = cs.length ? cs.map((c, idx) => {
+      const st = statusCarga(c);
+      const conjunta = cargaFornosIds(c).length > 1;
+      return `<div class="seq-card ${conjunta ? 'joint' : ''}" onclick="abrirDetalheCarga('${c.id}')">
+        <div class="seq-top"><span class="seq-num">Corrida ${String(idx+1).padStart(2,'0')}</span><span class="fusao-tag ${st.cls}">${st.txt}</span></div>
+        <div class="seq-liga">${c.liga}</div>
+        <div class="seq-info">
+          <span>${tonFmt(totalCarga(c))} · ${pecasDaCarga(c).length} peça(s)</span>
+          <span>${conjunta ? capacidadeCarga(c).nomes : 'Prazo crítico ' + prazoCriticoCarga(c)}</span>
+          <span>${st.hint}</span>
         </div>
-        <div class="card-actions">
-          <span class="liga-tag">${c.liga}</span>
-          <button class="mini-btn" onclick="event.stopPropagation();abrirEditarFornos('${c.id}')">alterar forno</button>
-          <button class="rm-carga" onclick="event.stopPropagation();removerCarga('${c.id}')">remover carga</button>
+        <div class="seq-actions" onclick="event.stopPropagation()">
+          <button class="seq-btn" onclick="moverCargaSequencia('${c.id}', -1)">↑ subir</button>
+          <button class="seq-btn" onclick="moverCargaSequencia('${c.id}', 1)">↓ descer</button>
+          <button class="seq-btn" onclick="abrirEditarFornos('${c.id}')">forno</button>
+        </div>
+      </div>`;
+    }).join('') : '<div class="fusao-empty">Sem carga neste forno</div>';
+    return `<div class="seq-forno">
+      <div class="seq-forno-head">
+        <div class="seq-forno-name">${f.nome}</div>
+        <div class="seq-summary">
+          <div class="seq-mini"><label>Planejado</label><strong>${tonFmt(peso)}</strong></div>
+          <div class="seq-mini"><label>Cargas</label><strong>${cs.length}</strong></div>
         </div>
       </div>
-      <div class="forno-body">
-        <div class="forno-kg">${total.toLocaleString('pt-BR')} <span>kg / ${cap.max.toLocaleString('pt-BR')} kg</span></div>
-        <div class="prog-bar-bg">
-          <div class="prog-bar-fill ${fillCls}" style="width:${pct}%"></div>
-          <div class="prog-min-mark" style="left:${minPct}%" title="Mínimo: ${cap.min.toLocaleString('pt-BR')}kg"></div>
-        </div>
-        <div class="prog-labels">
-          <span>0</span><span style="color:#185fa5">${cap.min.toLocaleString('pt-BR')} (mín)</span><span>${cap.max.toLocaleString('pt-BR')}</span>
-        </div>
-        ${alertHTML}
-        <div class="forno-pecas">${chips || '<span style="font-size:10px;color:#888780">Nenhuma peça adicionada.</span>'}</div>
-        <button class="add-btn" onclick="event.stopPropagation();abrirModalForno('${c.id}','${c.liga}')">
-          <i class="ti ti-plus" style="font-size:12px"></i> Adicionar peça (${c.liga} · sem. ${c.semana})
-        </button>
-      </div>
+      <div class="seq-body">${cards}</div>
     </div>`;
   }).join('');
+
+  const conjuntas = cargasBase.filter(c => cargaFornosIds(c).length > 1);
+  const joint = conjuntas.length ? `
+    <div class="joint-section">
+      <div class="joint-title">Cargas conjuntas</div>
+      <div class="joint-grid">${conjuntas.map(c => htmlCargaCard(c, true)).join('')}</div>
+    </div>` : '';
+
+  el.innerHTML = `<div class="seq-grid">${colunas}</div>${joint}`;
+}
+
+function renderPendentesFusao() {
+  const el = document.getElementById('fusao-pendentes-container');
+  if (!el) return;
+  const pendentes = pecasDisponiveisFusaoFiltro();
+  const semPlan = pendentes.filter(p => (p.alertas || []).includes('Sem planejamento')).length;
+  const linhas = pendentes.map(p => `
+    <tr>
+      <td>OS ${p.os}-${p.item}</td>
+      <td><strong>${p.codigo || '-'}</strong>${p.seq ? `<br><span style="color:#888780">Seq ${p.seq}</span>` : ''}</td>
+      <td>${p.cliente || '-'}</td>
+      <td>${p.desc || '-'}</td>
+      <td>${p.liga || '-'}</td>
+      <td>${kgFmt(pesoPeca(p))} kg</td>
+      <td>${semanaPrevFusaoPeca(p) || '-'}</td>
+      <td>${p.prz_fund || '-'}</td>
+      <td>${(p.alertas || []).length ? (p.alertas || []).map(a=>`<span class="fusao-tag ${a === 'Sem planejamento' ? 'amber' : 'red'}">${a}</span>`).join(' ') : '-'}</td>
+    </tr>`).join('');
+  el.innerHTML = `
+    <div class="fusao-panel">
+      <div class="fusao-panel-head">
+        <div>
+          <div class="fusao-panel-title">Peças pendentes de carga</div>
+          <div class="fusao-panel-sub">Tudo que ainda precisa ser planejado na semana ${semFusao}</div>
+        </div>
+        <span class="fusao-tag amber">${pendentes.length} peças · ${tonFmt(pesoTotalPecas(pendentes))} · ${semPlan} sem planejamento</span>
+      </div>
+      <div class="fusao-panel-body">
+        <table class="fusao-pend-table">
+          <thead><tr><th>OS</th><th>Código</th><th>Cliente</th><th>Descrição</th><th>Liga</th><th>Peso</th><th>Semana</th><th>Prazo</th><th>Alertas</th></tr></thead>
+          <tbody>${linhas || '<tr><td colspan="9" style="text-align:center;color:#888780;padding:20px">Nenhuma peça pendente nos filtros atuais.</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function moverCargaSequencia(cargaId, dir) {
+  const c = cargas.find(x => x.id === cargaId);
+  if (!c) return;
+  const idsSemana = cargas.filter(x => String(x.semana) === String(c.semana)).map(x => x.id);
+  const i = idsSemana.indexOf(cargaId);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= idsSemana.length) return;
+  const id2 = idsSemana[j];
+  const gi = cargas.findIndex(x => x.id === cargaId);
+  const gj = cargas.findIndex(x => x.id === id2);
+  if (gi < 0 || gj < 0) return;
+  const tmp = cargas[gi];
+  cargas[gi] = cargas[gj];
+  cargas[gj] = tmp;
+  renderFusao();
 }
 
 // ── Detalhes da carga ────────────────────────────────────────────

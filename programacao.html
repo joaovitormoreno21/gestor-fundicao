@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Programação Fundição — 13/06/2026 12:45</title>
+<title>Programação Fundição — 13/06/2026 12:51</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -167,7 +167,7 @@ select:focus,input:focus{border-color:#185fa5}
   <span class="saving" id="saving-ind">
     <i class="ti ti-loader-2" style="font-size:13px"></i> Salvando...
   </span>
-  <span class="sub">Atualizado em 13/06/2026 12:45 · v2026-06-13-v3-fusao-melhorada</span>
+  <span class="sub">Atualizado em 13/06/2026 12:51 · v2026-06-13-v3-fusao-melhorada</span>
 </div>
 
 <div class="container">
@@ -450,12 +450,14 @@ function pecasDaCarga(c) {
 
 function pesoPeca(p) { return Number(p?.peso || 0); }
 function totalCarga(c) { return pecasDaCarga(c).reduce((s,p)=>s+pesoPeca(p),0); }
-function semanaPrevFusaoPeca(p) { return String(p?.semana_fusao || p?.prevs?.fusao_prog || '').trim(); }
+// Para formar carga de fusão, a semana considerada é EXCLUSIVAMENTE
+// a coluna `semana_fusao` da base Gerenciamento (SQL).
+// Não usa `fusao_prev` do Acompanhamento para filtro/seleção de carga.
+function semanaPrevFusaoPeca(p) { return String(p?.semana_fusao || '').trim(); }
 function pecaPrevistaFusaoNaSemana(p, sem) {
   const s = String(sem || '').trim();
   if (!s) return false;
-  const possiveis = _unique([p?.semana_fusao, p?.prevs?.fusao_prog]);
-  return possiveis.includes(s);
+  return semanaPrevFusaoPeca(p) === s;
 }
 function pecaJaEmOutraCarga(chave, cargaIdIgnorar='') {
   return (cargas || []).some(c => c.id !== cargaIdIgnorar && (c.pecas || []).includes(chave));
@@ -1146,7 +1148,7 @@ function renderModalPecas() {
       </div>`).join('')
     : `<div style="text-align:center;padding:20px;color:#888780;font-size:12px">
         Nenhuma peça disponível para a liga ${modalLiga} na semana ${c.semana}.<br>
-        <span style="font-size:11px">A lista agora filtra por liga e por previsão de fusão da semana da carga.</span>
+        <span style="font-size:11px">A lista agora filtra por liga e pela coluna Semana Fusão do Gerenciamento.</span>
       </div>`;
 
   atualizarPesoModal();

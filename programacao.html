@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Programação Fundição — 13/06/2026 12:13</title>
+<title>Programação Fundição — 13/06/2026 12:39</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -113,6 +113,21 @@ select:focus,input:focus{border-color:#185fa5}
 .add-btn:hover{background:#f1efe8;color:#185fa5;border-color:#185fa5}
 .rm-carga{font-size:10px;color:#e24b4a;background:none;border:none;cursor:pointer;padding:0}
 .rm-carga:hover{text-decoration:underline}
+.card-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.mini-btn{font-size:10px;color:#185fa5;background:#fff;border:0.5px solid rgba(24,95,165,.25);border-radius:4px;cursor:pointer;padding:2px 6px}
+.mini-btn:hover{background:#e6f1fb}
+.forno-card.clickable{cursor:pointer}
+.forno-card.clickable:hover{box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.carga-meta{font-size:10px;color:#5f5e5a;margin-top:2px}
+.info-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.info-card{background:#f9f8f6;border:0.5px solid rgba(0,0,0,.08);border-radius:7px;padding:8px}
+.info-card .lbl{font-size:10px;color:#888780;text-transform:uppercase;letter-spacing:.04em}
+.info-card .val{font-size:14px;font-weight:600;color:#1a1a18;margin-top:2px}
+.detalhe-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px}
+.detalhe-table th{text-align:left;color:#5f5e5a;font-size:10px;text-transform:uppercase;border-bottom:0.5px solid rgba(0,0,0,.12);padding:6px 4px}
+.detalhe-table td{border-bottom:0.5px solid rgba(0,0,0,.06);padding:6px 4px;vertical-align:top}
+.detalhe-table .num{text-align:right;white-space:nowrap}
+.select-help{font-size:10px;color:#888780;margin-top:3px}
 
 /* Semana nav */
 .sem-nav{display:flex;align-items:center;gap:6px}
@@ -152,7 +167,7 @@ select:focus,input:focus{border-color:#185fa5}
   <span class="saving" id="saving-ind">
     <i class="ti ti-loader-2" style="font-size:13px"></i> Salvando...
   </span>
-  <span class="sub">Atualizado em 13/06/2026 12:13 · v2026-06-12-v2-salvamento-robusto</span>
+  <span class="sub">Atualizado em 13/06/2026 12:39 · v2026-06-13-v3-fusao-melhorada</span>
 </div>
 
 <div class="container">
@@ -322,11 +337,11 @@ select:focus,input:focus{border-color:#185fa5}
     <div class="nova-carga-grid">
       <div class="field">
         <label>Forno</label>
-        <select id="nc-forno"></select>
+        <select id="nc-forno" multiple size="6"></select><span class="select-help">Segure Ctrl para selecionar dois fornos e formar uma carga conjunta.</span>
       </div>
       <div class="field">
         <label>Semana</label>
-        <input type="text" id="nc-semana" placeholder="Ex: 202624">
+        <input type="text" id="nc-semana" placeholder="Ex: 202624" oninput="popularLigasNovaCarga()">
       </div>
       <div class="field" style="grid-column:1/-1">
         <label>Liga</label>
@@ -342,6 +357,41 @@ select:focus,input:focus{border-color:#185fa5}
   </div>
 </div>
 
+<!-- Modal: editar forno(s) da carga -->
+<div class="modal-ov" id="modal-editar-fornos">
+  <div class="modal" style="max-width:430px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3>Alterar forno(s) da carga</h3>
+      <button class="btn" onclick="fecharModal('modal-editar-fornos')"><i class="ti ti-x"></i></button>
+    </div>
+    <p style="font-size:12px;color:#5f5e5a;margin-bottom:10px">
+      Selecione um forno ou mais de um para juntar capacidade na mesma carga.
+    </p>
+    <div class="field" style="margin-bottom:14px">
+      <label>Forno(s)</label>
+      <select id="ef-fornos" multiple size="6"></select>
+      <span class="select-help">Segure Ctrl para selecionar dois fornos.</span>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="fecharModal('modal-editar-fornos')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarEditarFornos()">
+        <i class="ti ti-check"></i> Confirmar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: detalhes da carga -->
+<div class="modal-ov" id="modal-detalhe-carga">
+  <div class="modal" style="width:900px;max-width:96vw">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 id="det-title">Detalhes da carga</h3>
+      <button class="btn" onclick="fecharModal('modal-detalhe-carga')"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="det-conteudo"></div>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════════════════════════════
 // DADOS INJETADOS PELO PYTHON
@@ -351,13 +401,68 @@ const FORNOS        = [{"id": "f6", "nome": "Forno 6", "min": 1500, "max": 2750}
 const APPS_URL      = 'https://script.google.com/macros/s/AKfycbzLZistVHMvdnOGlGRcKXHurBfy-4vBKjyiksLruyLyTOiSfMdKI8PGgQSrtIRnkBWFNg/exec';
 const SEM_ATUAL     = '202623';
 
-let cargas       = [{"id": "c1781362612991", "forno": "f20", "semana": "202624", "liga": "AM-25", "pecas": ["27544-1", "27544-2", "27544-3", "27544-4"]}];
-let ordemManual  = {"moldagem|202623": {"27538-5": 999, "27538-6": 999, "27543-1": 999}, "moldagem|202625": {"27579-1": 999, "27523-1": 999, "27581-1": 999, "27581-2": 999, "27581-3": 999, "27584-1": 999, "27584-2": 999, "27593-1": 999, "27598-1": 999, "27299-6": 999, "27567-1": 999, "27563-1": 999, "27563-2": 999, "27563-4": 999, "27583-1": 999}, "fusao_prog|202623": {"27554-7": 999}, "projeto|202623": {"27583-1": 0, "27588-1": 1, "27588-2": 1, "27588-3": 2}, "projeto|202622": {"27554-7": 999, "27544-4": 999, "27544-1": 999, "27544-2": 999, "27544-3": 999, "27544-7": 999, "27544-5": 999, "27544-6": 999, "27544-8": 999, "27559-4": 999, "27559-5": 999, "27559-6": 999, "27559-7": 999, "27559-8": 999, "27559-9": 999, "27545-1": 999, "27456-3": 999, "27457-1": 999, "27545-2": 999, "27545-3": 999, "27545-4": 999, "27545-5": 999, "27545-16": 999, "27554-15": 999, "27554-18": 999, "27559-1": 999, "27559-2": 999, "27554-26": 999, "27538-1": 999, "27538-2": 999, "27538-3": 999, "27538-4": 999, "27538-5": 999, "27538-6": 999}};  // {'setor|semana': {'chave': idx}}
+let cargas       = [{"id": "c1781362289567", "forno": "f30", "semana": "202624", "liga": "AM-25", "pecas": ["27544-1", "27544-2", "27544-3", "27544-4", "27544-5", "27544-6", "27544-7", "27544-8", "27551-2", "27551-1"]}];
+let ordemManual  = {"moldagem|202623": {"27538-5": 999, "27538-6": 999, "27543-1": 999}, "moldagem|202625": {"27579-1": 999, "27523-1": 999, "27581-1": 999, "27581-2": 999, "27581-3": 999, "27584-1": 999, "27584-2": 999, "27593-1": 999, "27598-1": 999, "27299-6": 999, "27567-1": 999, "27563-1": 999, "27563-2": 999, "27563-4": 999, "27583-1": 999}, "fusao_prog|202623": {"27554-7": 999}, "projeto|202623": {"27583-1": 0, "27588-1": 1, "27588-2": 1, "27588-3": 2}, "projeto|202622": {"27554-7": 999, "27544-4": 999, "27544-1": 999, "27544-2": 999, "27544-3": 999, "27544-7": 999, "27544-5": 999, "27544-6": 999, "27544-8": 999, "27559-4": 999, "27559-5": 999, "27559-6": 999, "27559-7": 999, "27559-8": 999, "27559-9": 999, "27545-1": 999, "27456-3": 999, "27457-1": 999, "27545-2": 999, "27545-3": 999, "27545-4": 999, "27545-5": 999, "27545-16": 999, "27554-15": 999, "27554-18": 999, "27559-1": 999, "27559-2": 999, "27554-26": 999, "27538-1": 999, "27538-2": 999, "27538-3": 999, "27538-4": 999, "27538-5": 999, "27538-6": 999, "27543-1": 999}, "ficha_processo|202622": {"27554-7": 999, "27544-4": 999, "27544-1": 999, "27544-2": 999, "27544-3": 999, "27544-7": 999, "27544-5": 999, "27544-6": 999, "27544-8": 999, "27520-1": 999, "27546-1": 999, "27546-2": 999, "27546-3": 999, "27546-4": 999, "27546-5": 999, "27546-6": 999, "27559-4": 999, "27559-5": 999, "27559-6": 999, "27559-7": 999, "27559-8": 999}, "projeto|202624": {"27583-1": 0, "27588-1": 1, "27588-2": 1, "27588-3": 2, "27438-1": 3, "27438-2": 4, "27566-1": 5, "27566-2": 6}, "projeto|202625": {"27438-1": 0, "27438-2": 1}, "fab_modelo|202624": {"27593-1": 0, "27588-1": 1, "27588-2": 2, "27588-3": 3}, "insp_modelo|202624": {"27551-2": 0, "27551-1": 1}};  // {'setor|semana': {'chave': idx}}
 let semFusao     = SEM_ATUAL;
 let modalCargaId = null;
 let modalLiga    = null;
+let editFornosCargaId = null;
 let dragChave    = null;
 let dragSetor    = null;
+
+function _unique(arr) {
+  return Array.from(new Set((arr || []).map(x => String(x || '').trim()).filter(Boolean)));
+}
+
+function cargaFornosIds(c) {
+  const ids = _unique(c && Array.isArray(c.fornos) ? c.fornos : []);
+  if (c && c.forno && !ids.includes(String(c.forno))) ids.unshift(String(c.forno));
+  return ids;
+}
+
+function normalizarCarga(c) {
+  const ids = cargaFornosIds(c);
+  c.fornos = ids;
+  c.forno = ids[0] || '';
+  c.pecas = _unique(c.pecas || []);
+  return c;
+}
+
+cargas = (cargas || []).map(c => normalizarCarga(c));
+
+function cargaFornos(c) {
+  return cargaFornosIds(c).map(id => FORNOS.find(f => f.id === id)).filter(Boolean);
+}
+
+function capacidadeCarga(c) {
+  const fs = cargaFornos(c);
+  return {
+    min: fs.reduce((s,f)=>s+Number(f.min||0),0),
+    max: fs.reduce((s,f)=>s+Number(f.max||0),0),
+    nomes: fs.map(f=>f.nome).join(' + ') || 'Sem forno'
+  };
+}
+
+function pecasDaCarga(c) {
+  const set = new Set(c.pecas || []);
+  return PECAS.filter(p => set.has(p.chave));
+}
+
+function pesoPeca(p) { return Number(p?.peso || 0); }
+function totalCarga(c) { return pecasDaCarga(c).reduce((s,p)=>s+pesoPeca(p),0); }
+function semanaPrevFusaoPeca(p) { return String(p?.semana_fusao || p?.prevs?.fusao_prog || '').trim(); }
+function pecaPrevistaFusaoNaSemana(p, sem) {
+  const s = String(sem || '').trim();
+  if (!s) return false;
+  const possiveis = _unique([p?.semana_fusao, p?.prevs?.fusao_prog]);
+  return possiveis.includes(s);
+}
+function pecaJaEmOutraCarga(chave, cargaIdIgnorar='') {
+  return (cargas || []).some(c => c.id !== cargaIdIgnorar && (c.pecas || []).includes(chave));
+}
+function ligasPrevistasSemana(sem) {
+  return _unique(PECAS.filter(p => p.liga && pecaPrevistaFusaoNaSemana(p, sem)).map(p => p.liga)).sort();
+}
 
 const SETORES = [
   {key:'projeto',          label:'Projeto Engenharia'},
@@ -383,7 +488,10 @@ function semMais(sem, n) {
 function initDropdowns() {
   // Semanas disponíveis
   const semSet = new Set();
-  PECAS.forEach(p => Object.values(p.prevs).forEach(s => { if(s) semSet.add(s); }));
+  PECAS.forEach(p => {
+    Object.values(p.prevs).forEach(s => { if(s) semSet.add(s); });
+    if (p.semana_fusao) semSet.add(p.semana_fusao);
+  });
   const sems = [...semSet].sort();
   const semFim3 = semMais(SEM_ATUAL, 3);
 
@@ -422,16 +530,21 @@ function initDropdowns() {
     });
   });
 
-  // Fornos no modal nova carga
-  const ncForno = document.getElementById('nc-forno');
-  FORNOS.forEach(f => {
-    const opt = document.createElement('option');
-    opt.value = f.id;
-    opt.textContent = `${f.nome} (max ${f.max.toLocaleString('pt-BR')} kg)`;
-    ncForno.appendChild(opt);
+  // Fornos nos modais de nova carga e edição de carga.
+  ['nc-forno','ef-fornos'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = '';
+    FORNOS.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f.id;
+      opt.textContent = `${f.nome} (mín ${f.min.toLocaleString('pt-BR')} · máx ${f.max.toLocaleString('pt-BR')} kg)`;
+      el.appendChild(opt);
+    });
   });
 
   document.getElementById('nc-semana').value = SEM_ATUAL;
+  popularLigasNovaCarga();
 }
 
 // ── Utilitários ─────────────────────────────────────────────────
@@ -855,6 +968,7 @@ function iniciarDrag(e) {
 
 // ── Render Fusão ─────────────────────────────────────────────────
 function renderFusao() {
+  cargas = (cargas || []).map(c => normalizarCarga(c));
   const ligaFil = document.getElementById('fil-liga').value;
   const cargasSem = cargas.filter(c=>c.semana===semFusao && (!ligaFil||c.liga===ligaFil));
 
@@ -870,51 +984,122 @@ function renderFusao() {
   }
 
   document.getElementById('fusao-container').innerHTML = cargasSem.map(c => {
-    const forno = FORNOS.find(f=>f.id===c.forno);
-    if (!forno) return '';
-    const ps = PECAS.filter(p=>c.pecas.includes(p.chave));
-    const total = ps.reduce((s,p)=>s+p.peso,0);
-    const pct = Math.min(100, (total/forno.max)*100);
-    const minPct = (forno.min/forno.max)*100;
-    const fillCls = total>forno.max?'fill-warn':total<forno.min?'fill-low':'fill-ok';
-    const alertHTML = total<forno.min
-      ? `<div class="alert-box alert-err"><i class="ti ti-alert-triangle" style="font-size:12px"></i>Abaixo do mínimo — faltam ${(forno.min-total).toLocaleString('pt-BR')} kg</div>`
-      : total>forno.max
-      ? `<div class="alert-box alert-err"><i class="ti ti-alert-circle" style="font-size:12px"></i>Excede máximo em ${(total-forno.max).toLocaleString('pt-BR')} kg</div>`
+    normalizarCarga(c);
+    const cap = capacidadeCarga(c);
+    if (!cap.max) return '';
+    const ps = pecasDaCarga(c);
+    const total = totalCarga(c);
+    const pct = Math.min(100, (total/cap.max)*100);
+    const minPct = cap.max ? (cap.min/cap.max)*100 : 0;
+    const fillCls = total>cap.max?'fill-warn':total<cap.min?'fill-low':'fill-ok';
+    const alertHTML = total<cap.min
+      ? `<div class="alert-box alert-err"><i class="ti ti-alert-triangle" style="font-size:12px"></i>Abaixo do mínimo — faltam ${(cap.min-total).toLocaleString('pt-BR')} kg</div>`
+      : total>cap.max
+      ? `<div class="alert-box alert-err"><i class="ti ti-alert-circle" style="font-size:12px"></i>Excede máximo em ${(total-cap.max).toLocaleString('pt-BR')} kg</div>`
       : `<div class="alert-box alert-ok"><i class="ti ti-check" style="font-size:12px"></i>Carga dentro da capacidade</div>`;
     const chips = ps.map(p=>`
       <div class="peca-chip" title="${p.desc} — ${p.cliente}">
-        <span>OS ${p.os}-${p.item} · ${p.codigo} · ${p.peso.toLocaleString('pt-BR')}kg</span>
-        <span class="rm" onclick="removerPeca('${c.id}','${p.chave}')">×</span>
+        <span>OS ${p.os}-${p.item} · ${p.codigo} · ${pesoPeca(p).toLocaleString('pt-BR')}kg</span>
+        <span class="rm" onclick="event.stopPropagation();removerPeca('${c.id}','${p.chave}')">×</span>
       </div>`).join('');
-    return `<div class="forno-card">
+    return `<div class="forno-card clickable" onclick="abrirDetalheCarga('${c.id}')">
       <div class="forno-header">
         <div>
-          <div class="forno-title">${forno.nome}</div>
-          <div class="forno-cap">Mín ${forno.min.toLocaleString('pt-BR')} · Máx ${forno.max.toLocaleString('pt-BR')} kg</div>
+          <div class="forno-title">${cap.nomes}</div>
+          <div class="forno-cap">Mín ${cap.min.toLocaleString('pt-BR')} · Máx ${cap.max.toLocaleString('pt-BR')} kg</div>
+          <div class="carga-meta">Semana ${c.semana} · ${ps.length} peça(s)</div>
         </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+        <div class="card-actions">
           <span class="liga-tag">${c.liga}</span>
-          <button class="rm-carga" onclick="removerCarga('${c.id}')">remover carga</button>
+          <button class="mini-btn" onclick="event.stopPropagation();abrirEditarFornos('${c.id}')">alterar forno</button>
+          <button class="rm-carga" onclick="event.stopPropagation();removerCarga('${c.id}')">remover carga</button>
         </div>
       </div>
       <div class="forno-body">
-        <div class="forno-kg">${total.toLocaleString('pt-BR')} <span>kg / ${forno.max.toLocaleString('pt-BR')} kg</span></div>
+        <div class="forno-kg">${total.toLocaleString('pt-BR')} <span>kg / ${cap.max.toLocaleString('pt-BR')} kg</span></div>
         <div class="prog-bar-bg">
           <div class="prog-bar-fill ${fillCls}" style="width:${pct}%"></div>
-          <div class="prog-min-mark" style="left:${minPct}%" title="Mínimo: ${forno.min.toLocaleString('pt-BR')}kg"></div>
+          <div class="prog-min-mark" style="left:${minPct}%" title="Mínimo: ${cap.min.toLocaleString('pt-BR')}kg"></div>
         </div>
         <div class="prog-labels">
-          <span>0</span><span style="color:#185fa5">${forno.min.toLocaleString('pt-BR')} (mín)</span><span>${forno.max.toLocaleString('pt-BR')}</span>
+          <span>0</span><span style="color:#185fa5">${cap.min.toLocaleString('pt-BR')} (mín)</span><span>${cap.max.toLocaleString('pt-BR')}</span>
         </div>
         ${alertHTML}
-        <div class="forno-pecas">${chips}</div>
-        <button class="add-btn" onclick="abrirModalForno('${c.id}','${c.liga}')">
-          <i class="ti ti-plus" style="font-size:12px"></i> Adicionar peça (${c.liga})
+        <div class="forno-pecas">${chips || '<span style="font-size:10px;color:#888780">Nenhuma peça adicionada.</span>'}</div>
+        <button class="add-btn" onclick="event.stopPropagation();abrirModalForno('${c.id}','${c.liga}')">
+          <i class="ti ti-plus" style="font-size:12px"></i> Adicionar peça (${c.liga} · sem. ${c.semana})
         </button>
       </div>
     </div>`;
   }).join('');
+}
+
+// ── Detalhes da carga ────────────────────────────────────────────
+function abrirDetalheCarga(cargaId) {
+  const c = cargas.find(x=>x.id===cargaId);
+  if (!c) return;
+  normalizarCarga(c);
+  const cap = capacidadeCarga(c);
+  const ps = pecasDaCarga(c);
+  const total = totalCarga(c);
+  const pct = cap.max ? (total / cap.max) * 100 : 0;
+  document.getElementById('det-title').textContent = `Detalhes da carga — ${cap.nomes}`;
+  const linhas = ps.map(p => `
+    <tr>
+      <td>OS ${p.os}-${p.item}</td>
+      <td><strong>${p.codigo}</strong>${p.seq ? `<br><span style="color:#888780">Seq ${p.seq}</span>` : ''}</td>
+      <td>${p.cliente || '-'}</td>
+      <td>${p.desc || '-'}</td>
+      <td>${p.liga || '-'}</td>
+      <td class="num">${pesoPeca(p).toLocaleString('pt-BR')} kg</td>
+      <td>${semanaPrevFusaoPeca(p) || '-'}</td>
+      <td>${p.prz_fund || '-'}</td>
+      <td>${(p.alertas || []).length ? p.alertas.join('<br>') : '-'}</td>
+    </tr>`).join('');
+
+  document.getElementById('det-conteudo').innerHTML = `
+    <div class="info-grid">
+      <div class="info-card"><div class="lbl">Forno(s)</div><div class="val">${cap.nomes}</div></div>
+      <div class="info-card"><div class="lbl">Liga</div><div class="val">${c.liga}</div></div>
+      <div class="info-card"><div class="lbl">Semana</div><div class="val">${c.semana}</div></div>
+      <div class="info-card"><div class="lbl">Peças</div><div class="val">${ps.length}</div></div>
+      <div class="info-card"><div class="lbl">Peso total</div><div class="val">${total.toLocaleString('pt-BR')} kg</div></div>
+      <div class="info-card"><div class="lbl">Mínimo</div><div class="val">${cap.min.toLocaleString('pt-BR')} kg</div></div>
+      <div class="info-card"><div class="lbl">Máximo</div><div class="val">${cap.max.toLocaleString('pt-BR')} kg</div></div>
+      <div class="info-card"><div class="lbl">Ocupação</div><div class="val">${pct.toFixed(1).replace('.', ',')}%</div></div>
+    </div>
+    <div style="display:flex;gap:8px;margin:10px 0">
+      <button class="btn btn-primary" onclick="fecharModal('modal-detalhe-carga');abrirModalForno('${c.id}','${c.liga}')"><i class="ti ti-plus"></i> Adicionar peça</button>
+      <button class="btn" onclick="fecharModal('modal-detalhe-carga');abrirEditarFornos('${c.id}')"><i class="ti ti-tools"></i> Alterar forno(s)</button>
+    </div>
+    <table class="detalhe-table">
+      <thead><tr><th>OS</th><th>Código</th><th>Cliente</th><th>Descrição</th><th>Liga</th><th class="num">Peso</th><th>Sem. Fusão</th><th>Prazo Fund.</th><th>Alertas</th></tr></thead>
+      <tbody>${linhas || '<tr><td colspan="9" style="text-align:center;color:#888780;padding:20px">Nenhuma peça adicionada.</td></tr>'}</tbody>
+    </table>`;
+  document.getElementById('modal-detalhe-carga').classList.add('open');
+}
+
+// ── Editar forno(s) da carga ─────────────────────────────────────
+function abrirEditarFornos(cargaId) {
+  const c = cargas.find(x=>x.id===cargaId);
+  if (!c) return;
+  normalizarCarga(c);
+  editFornosCargaId = cargaId;
+  const ids = cargaFornosIds(c);
+  const sel = document.getElementById('ef-fornos');
+  Array.from(sel.options).forEach(opt => opt.selected = ids.includes(opt.value));
+  document.getElementById('modal-editar-fornos').classList.add('open');
+}
+
+function confirmarEditarFornos() {
+  const c = cargas.find(x=>x.id===editFornosCargaId);
+  if (!c) return;
+  const ids = Array.from(document.getElementById('ef-fornos').selectedOptions).map(o=>o.value);
+  if (!ids.length) { alert('Selecione pelo menos um forno.'); return; }
+  c.fornos = _unique(ids);
+  c.forno = c.fornos[0];
+  fecharModal('modal-editar-fornos');
+  renderFusao();
 }
 
 // ── Modal Forno ──────────────────────────────────────────────────
@@ -922,8 +1107,10 @@ function abrirModalForno(cargaId, liga) {
   modalCargaId = cargaId;
   modalLiga    = liga;
   const c = cargas.find(x=>x.id===cargaId);
-  const f = FORNOS.find(x=>x.id===c.forno);
-  document.getElementById('modal-title').textContent = `Adicionar peças — ${f.nome} (${liga})`;
+  if (!c) return;
+  normalizarCarga(c);
+  const cap = capacidadeCarga(c);
+  document.getElementById('modal-title').textContent = `Adicionar peças — ${cap.nomes} · sem. ${c.semana} (${liga})`;
   document.getElementById('modal-busca').value = '';
   renderModalPecas();
   document.getElementById('modal-pecas').classList.add('open');
@@ -931,29 +1118,36 @@ function abrirModalForno(cargaId, liga) {
 
 function renderModalPecas() {
   const c = cargas.find(x=>x.id===modalCargaId);
-  const f = FORNOS.find(x=>x.id===c.forno);
+  if (!c) return;
+  normalizarCarga(c);
+  const cap = capacidadeCarga(c);
   const busca = document.getElementById('modal-busca').value.toLowerCase();
-  const pesoAtual = PECAS.filter(p=>c.pecas.includes(p.chave)).reduce((s,p)=>s+p.peso,0);
-  document.getElementById('modal-liga-label').textContent = `Liga: ${modalLiga}`;
-  document.getElementById('modal-peso-label').textContent = `Atual: ${pesoAtual.toLocaleString('pt-BR')} / ${f.max.toLocaleString('pt-BR')} kg`;
+  const pesoAtual = totalCarga(c);
+  document.getElementById('modal-liga-label').textContent = `Liga: ${modalLiga} · Semana: ${c.semana}`;
+  document.getElementById('modal-peso-label').textContent = `Atual: ${pesoAtual.toLocaleString('pt-BR')} / ${cap.max.toLocaleString('pt-BR')} kg`;
 
   const disp = PECAS.filter(p =>
     p.liga === modalLiga &&
+    pecaPrevistaFusaoNaSemana(p, c.semana) &&
     !c.pecas.includes(p.chave) &&
-    (!busca || `${p.os} ${p.item} ${p.codigo} ${p.cliente} ${p.desc}`.toLowerCase().includes(busca))
+    !pecaJaEmOutraCarga(p.chave, c.id) &&
+    (!busca || `${p.os} ${p.item} ${p.codigo} ${p.cliente} ${p.desc} ${p.liga}`.toLowerCase().includes(busca))
   );
 
   document.getElementById('modal-lista').innerHTML = disp.length
     ? disp.map(p=>`
       <div class="pli" onclick="togglePeca(this)">
-        <input type="checkbox" data-chave="${p.chave}" data-peso="${p.peso}" onclick="event.stopPropagation()">
+        <input type="checkbox" data-chave="${p.chave}" data-peso="${pesoPeca(p)}" onclick="event.stopPropagation()">
         <div class="pli-info">
           <div class="pli-os">OS ${p.os}-${p.item} · ${p.codigo}${p.seq?` · Seq ${p.seq}`:''}</div>
-          <div class="pli-desc">${p.desc} · ${p.cliente}</div>
+          <div class="pli-desc">${p.desc} · ${p.cliente} · Sem. Fusão ${semanaPrevFusaoPeca(p) || '-'}</div>
         </div>
-        <div class="pli-peso">${p.peso.toLocaleString('pt-BR')} kg</div>
+        <div class="pli-peso">${pesoPeca(p).toLocaleString('pt-BR')} kg</div>
       </div>`).join('')
-    : '<div style="text-align:center;padding:20px;color:#888780;font-size:12px">Nenhuma peça disponível para esta liga</div>';
+    : `<div style="text-align:center;padding:20px;color:#888780;font-size:12px">
+        Nenhuma peça disponível para a liga ${modalLiga} na semana ${c.semana}.<br>
+        <span style="font-size:11px">A lista agora filtra por liga e por previsão de fusão da semana da carga.</span>
+      </div>`;
 
   atualizarPesoModal();
 }
@@ -966,18 +1160,20 @@ function togglePeca(el) {
 
 function atualizarPesoModal() {
   const c = cargas.find(x=>x.id===modalCargaId);
-  const f = FORNOS.find(x=>x.id===c.forno);
-  const pesoBase = PECAS.filter(p=>c.pecas.includes(p.chave)).reduce((s,p)=>s+p.peso,0);
+  if (!c) return;
+  const cap = capacidadeCarga(c);
+  const pesoBase = totalCarga(c);
   const pesoSel  = Array.from(document.querySelectorAll('#modal-lista input:checked'))
-    .reduce((s,cb)=>s+parseInt(cb.dataset.peso),0);
+    .reduce((s,cb)=>s+Number(cb.dataset.peso || 0),0);
   const total = pesoBase + pesoSel;
   const el = document.getElementById('modal-total-label');
-  el.textContent = `Total: ${total.toLocaleString('pt-BR')} / ${f.max.toLocaleString('pt-BR')} kg`;
-  el.style.color = total>f.max?'#a32d2d':total<f.min?'#ba7517':'#3b6d11';
+  el.textContent = `Total: ${total.toLocaleString('pt-BR')} / ${cap.max.toLocaleString('pt-BR')} kg`;
+  el.style.color = total>cap.max?'#a32d2d':total<cap.min?'#ba7517':'#3b6d11';
 }
 
 function confirmarPecas() {
   const c = cargas.find(x=>x.id===modalCargaId);
+  if (!c) return;
   document.querySelectorAll('#modal-lista input:checked').forEach(cb=>{
     if (!c.pecas.includes(cb.dataset.chave)) c.pecas.push(cb.dataset.chave);
   });
@@ -997,18 +1193,30 @@ function removerCarga(cargaId) {
 }
 
 // ── Nova Carga ───────────────────────────────────────────────────
+function popularLigasNovaCarga() {
+  const sem = document.getElementById('nc-semana')?.value?.trim() || semFusao;
+  const ligaEl = document.getElementById('nc-liga');
+  if (!ligaEl) return;
+  const ligas = ligasPrevistasSemana(sem);
+  const atual = ligaEl.value;
+  ligaEl.innerHTML = '<option value="">Selecione a liga...</option>' + ligas.map(l=>`<option value="${l}">${l}</option>`).join('');
+  if (ligas.includes(atual)) ligaEl.value = atual;
+}
+
 function abrirNovaCarga() {
   document.getElementById('nc-semana').value = semFusao;
+  Array.from(document.getElementById('nc-forno').options).forEach((opt, idx) => opt.selected = idx === 0);
+  popularLigasNovaCarga();
   document.getElementById('modal-nova-carga').classList.add('open');
 }
 
 function confirmarNovaCarga() {
-  const forno = document.getElementById('nc-forno').value;
+  const fornos = Array.from(document.getElementById('nc-forno').selectedOptions).map(o=>o.value);
   const sem   = document.getElementById('nc-semana').value.trim();
   const liga  = document.getElementById('nc-liga').value;
-  if (!forno || !sem || !liga) { alert('Preencha todos os campos.'); return; }
+  if (!fornos.length || !sem || !liga) { alert('Preencha a semana, a liga e selecione pelo menos um forno.'); return; }
   const id = 'c' + Date.now();
-  cargas.push({ id, forno, semana: sem, liga, pecas: [] });
+  cargas.push(normalizarCarga({ id, forno: fornos[0], fornos, semana: sem, liga, pecas: [] }));
   semFusao = sem;
   document.getElementById('sem-fusao-cur').textContent = semFusao;
   fecharModal('modal-nova-carga');
@@ -1162,6 +1370,9 @@ async function salvarModeloExterno(codigo, dataPrev, dataChegada, remover) {
 }
 
 // ── Salvar ordem dos setores / programação ───────────────────────
+const PROGRAMACAO_SNAPSHOT_MARKER = '__SNAPSHOT_V2__';
+const PROGRAMACAO_SNAPSHOT_CHUNK = 25000;
+
 function _limparLinhaProgramacao(row) {
   const out = {};
   Object.entries(row || {}).forEach(([k, v]) => {
@@ -1192,181 +1403,124 @@ async function _postAppsJson(payload) {
   return json || { success: true, message: txt };
 }
 
-async function _salvarProgramacaoIndividual(payload) {
-  // Fallback append-only: usado quando o Apps Script/Sheets falha ao limpar
-  // abas vazias com "Those rows are out of bounds" ou "Não é possível excluir todas as linhas não congeladas".
-  const ts = new Date().toLocaleString('pt-BR');
-  const linhas = [];
-
-  (payload.linhasSetores || []).forEach(r => linhas.push(_limparLinhaProgramacao({
-    action: 'programacao_setor',
-    timestamp: ts,
-    setor: r.setor,
-    semana: r.semana,
-    chave: r.chave,
-    ordem_idx: r.ordem_idx
-  })));
-
-  (payload.linhasCargas || []).forEach(r => linhas.push(_limparLinhaProgramacao({
-    action: 'programacao_fusao',
-    timestamp: ts,
-    id_carga: r.id_carga,
-    forno: r.forno,
-    semana: r.semana,
-    liga: r.liga,
-    chave: r.chave || ''
-  })));
-
-  if (!linhas.length) return { success: true };
-
-  for (const linha of linhas) {
-    await _postAppsJson(linha);
+function _encodeBase64Utf8(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  const step = 0x8000;
+  for (let i = 0; i < bytes.length; i += step) {
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i + step));
   }
-  return { success: true, fallback: true, linhas: linhas.length };
+  return btoa(bin);
 }
 
-async function _salvarProgramacaoPayload(payload) {
-  // Primeiro tenta o salvamento em lote original. Se o Google Sheets recusar a
-  // limpeza da aba no segundo salvamento por causa de linhas congeladas, cai para
-  // o modo compatibilidade append-only. A leitura usa apenas o snapshot mais recente.
-  const lote = {};
-  if (payload.linhasSetores && payload.linhasSetores.length) lote.linhasSetores = payload.linhasSetores;
-  if (payload.linhasCargas && payload.linhasCargas.length) lote.linhasCargas = payload.linhasCargas;
-
-  if (!lote.linhasSetores && !lote.linhasCargas) {
-    return { success: true, vazio: true };
-  }
-
-  try {
-    return await _postAppsJson(lote);
-  } catch (err) {
-    console.warn('Salvamento em lote falhou. Tentando modo compatibilidade append-only:', err);
-    return await _salvarProgramacaoIndividual(lote);
-  }
+function _chunkString(str, size) {
+  const chunks = [];
+  for (let i = 0; i < str.length; i += size) chunks.push(str.slice(i, i + size));
+  return chunks.length ? chunks : [''];
 }
 
-function _montarLinhasSetores(snapshotTs) {
-  const linhasSetores = [];
+function _cloneOrdemManualComMovimentos() {
+  const ordem = JSON.parse(JSON.stringify(ordemManual || {}));
 
-  Object.entries(ordemManual).forEach(([key, idxMap]) => {
-    const [setor, sem] = key.split('|');
-    Object.entries(idxMap).forEach(([chave, idx]) => {
-      if (!setor || !sem || !chave) return;
-      linhasSetores.push(_limparLinhaProgramacao({
-        action: 'programacao_setor',
-        timestamp: snapshotTs,
-        setor,
-        semana: String(sem),
-        chave,
-        ordem_idx: idx
-      }));
-    });
-  });
-
-  // Também salva peças movidas entre semanas, mesmo que não tenham ordem manual.
+  // Salva também movimentos de semana mesmo quando o usuário solta o card em uma
+  // coluna vazia e não existe ordem manual naquela coluna.
   PECAS.forEach(p => {
     Object.entries(p.prevs || {}).forEach(([setor, sem]) => {
       const semOrig = p._prevOrig?.[setor];
-      if (semOrig && sem && semOrig !== sem) {
-        const key = `${setor}|${sem}`;
-        if (!ordemManual[key] || ordemManual[key][p.chave] === undefined) {
-          linhasSetores.push(_limparLinhaProgramacao({
-            action: 'programacao_setor',
-            timestamp: snapshotTs,
-            setor,
-            semana: String(sem),
-            chave: p.chave,
-            ordem_idx: 999
-          }));
-        }
+      if (!setor || !semOrig || !sem || semOrig === sem) return;
+      const key = `${setor}|${sem}`;
+      if (!ordem[key]) ordem[key] = {};
+      if (ordem[key][p.chave] === undefined) ordem[key][p.chave] = 999;
+
+      // Nos setores agrupados, mantém todas as peças do mesmo código juntas.
+      if (AGRUPA_SETORES.has(setor) && p.codigo) {
+        PECAS.forEach(pp => {
+          if (pp.codigo === p.codigo) {
+            pp.prevs[setor] = sem;
+            if (ordem[key][pp.chave] === undefined) ordem[key][pp.chave] = ordem[key][p.chave];
+          }
+        });
       }
     });
   });
 
-  return linhasSetores;
+  // Limpa grupos vazios e força índices numéricos simples.
+  const normalizada = {};
+  Object.entries(ordem).forEach(([key, idxMap]) => {
+    if (!key || !idxMap || typeof idxMap !== 'object') return;
+    const limpo = {};
+    Object.entries(idxMap).forEach(([chave, idx]) => {
+      if (!chave) return;
+      const n = parseInt(idx);
+      limpo[String(chave)] = Number.isNaN(n) ? 999 : n;
+    });
+    if (Object.keys(limpo).length) normalizada[key] = limpo;
+  });
+  return normalizada;
 }
 
-function _montarLinhasCargas(snapshotTs) {
-  const linhasCargas = [];
-  cargas.forEach(c => {
-    if (!c || !c.id || !c.forno || !c.semana || !c.liga) return;
+function _normalizarCargasParaSnapshot() {
+  return (cargas || [])
+    .map(c => normalizarCarga(c))
+    .filter(c => c && c.id && cargaFornosIds(c).length && c.semana && c.liga)
+    .map(c => {
+      const ids = cargaFornosIds(c);
+      return {
+        id: String(c.id),
+        forno: String(ids[0] || ''),
+        fornos: ids,
+        semana: String(c.semana),
+        liga: String(c.liga),
+        pecas: Array.from(new Set((c.pecas || []).map(x => String(x)).filter(Boolean)))
+      };
+    });
+}
 
-    if (c.pecas && c.pecas.length) {
-      c.pecas.forEach(chave => {
-        linhasCargas.push(_limparLinhaProgramacao({
-          action: 'programacao_fusao',
-          timestamp: snapshotTs,
-          id_carga: c.id,
-          forno: c.forno,
-          semana: c.semana,
-          liga: c.liga,
-          chave
-        }));
-      });
-    } else {
-      linhasCargas.push(_limparLinhaProgramacao({
-        action: 'programacao_fusao',
-        timestamp: snapshotTs,
-        id_carga: c.id,
-        forno: c.forno,
-        semana: c.semana,
-        liga: c.liga,
-        chave: ''
-      }));
-    }
-  });
-  return linhasCargas;
+function _montarSnapshotProgramacao() {
+  const ts = new Date().toLocaleString('pt-BR');
+  return {
+    tipo: 'programacao_snapshot',
+    versao: 3,
+    timestamp: ts,
+    id: 'snap_' + Date.now(),
+    ordem_manual: _cloneOrdemManualComMovimentos(),
+    cargas: _normalizarCargasParaSnapshot()
+  };
+}
+
+async function _salvarProgramacaoSnapshot(estado) {
+  const payloadB64 = _encodeBase64Utf8(JSON.stringify(estado));
+  const chunks = _chunkString(payloadB64, PROGRAMACAO_SNAPSHOT_CHUNK);
+
+  // Estratégia nova: append-only. Não apaga linhas, não limpa aba e não toca em
+  // linhas congeladas. A leitura sempre pega o snapshot mais recente.
+  for (let i = 0; i < chunks.length; i++) {
+    await _postAppsJson(_limparLinhaProgramacao({
+      action: 'programacao_setor',
+      timestamp: estado.timestamp,
+      setor: PROGRAMACAO_SNAPSHOT_MARKER,
+      semana: `${estado.id}|${chunks.length}`,
+      chave: chunks[i],
+      ordem_idx: i
+    }));
+  }
+  return { success: true, chunks: chunks.length };
 }
 
 async function salvarOrdemSetores() {
-  const ind = document.getElementById('saving-ind');
-  ind.classList.add('show');
-  try {
-    const snapshotTs = new Date().toLocaleString('pt-BR');
-    const linhasSetores = _montarLinhasSetores(snapshotTs);
-
-    if (linhasSetores.length === 0) {
-      alert('Nenhuma alteração para salvar.');
-      return;
-    }
-
-    const json = await _salvarProgramacaoPayload({ linhasSetores });
-    if (json.success) {
-      PECAS.forEach(p => { p._prevOrig = Object.assign({}, p.prevs); });
-      const extra = json.fallback ? ' (modo compatibilidade)' : '';
-      alert(`✅ ${linhasSetores.length} posição(ões) salva(s)!${extra}`);
-    } else {
-      alert('❌ Erro: ' + (json.message || 'desconhecido'));
-    }
-  } catch(e) {
-    alert('❌ Erro ao salvar: ' + e.message);
-  } finally {
-    ind.classList.remove('show');
-  }
+  return salvarProgramacao();
 }
 
 async function salvarProgramacao() {
   const ind = document.getElementById('saving-ind');
   ind.classList.add('show');
   try {
-    const snapshotTs = new Date().toLocaleString('pt-BR');
-    const linhasSetores = _montarLinhasSetores(snapshotTs);
-    const linhasCargas = _montarLinhasCargas(snapshotTs);
-
-    if (linhasSetores.length === 0 && linhasCargas.length === 0) {
-      alert('Nenhuma programação para salvar.');
-      return;
-    }
-
-    const json = await _salvarProgramacaoPayload({ linhasSetores, linhasCargas });
-    if (json.success) {
-      PECAS.forEach(p => { p._prevOrig = Object.assign({}, p.prevs); });
-      const total = linhasSetores.length + linhasCargas.length;
-      const extra = json.fallback ? ' (modo compatibilidade)' : '';
-      alert(`✅ Programação salva com sucesso! ${total} linha(s) gravada(s).${extra}`);
-    } else {
-      alert('❌ Erro: ' + (json.message || 'desconhecido'));
-    }
+    const estado = _montarSnapshotProgramacao();
+    const json = await _salvarProgramacaoSnapshot(estado);
+    PECAS.forEach(p => { p._prevOrig = Object.assign({}, p.prevs); });
+    const qtdGrupos = Object.keys(estado.ordem_manual || {}).length;
+    const qtdCargas = (estado.cargas || []).length;
+    alert(`✅ Programação salva! ${qtdGrupos} grupo(s) de ordem e ${qtdCargas} carga(s) gravados em ${json.chunks} registro(s) JSON.`);
   } catch(e) {
     alert('❌ Erro ao salvar: ' + e.message);
   } finally {
@@ -1413,6 +1567,154 @@ function _filtrarUltimoSnapshotRows(rows, minCols) {
   return valid.filter(r => _parseSnapshotTs(r[0]) === maxTs);
 }
 
+
+function _decodeBase64Utf8(b64) {
+  const bin = atob(String(b64 || ''));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+function _extrairSnapshotProgramacaoRows(rows) {
+  const snapRows = (rows || []).filter(r =>
+    Array.isArray(r) && r.length >= 5 && String(r[1] || '').trim() === PROGRAMACAO_SNAPSHOT_MARKER
+  );
+  if (!snapRows.length) return null;
+
+  const grupos = new Map();
+  snapRows.forEach((r, idx) => {
+    const ts = _parseSnapshotTs(r[0]);
+    const snapId = String(r[2] || '').trim();
+    const key = (ts !== null ? 'ts_' + ts : '') || snapId || ('row_' + idx);
+    if (!grupos.has(key)) grupos.set(key, { rows: [], ts, idx });
+    grupos.get(key).rows.push(r);
+  });
+
+  const candidatos = Array.from(grupos.values()).sort((a, b) => {
+    if (a.ts !== null && b.ts !== null) return b.ts - a.ts;
+    if (a.ts !== null) return -1;
+    if (b.ts !== null) return 1;
+    return b.idx - a.idx;
+  });
+
+  for (const grupo of candidatos) {
+    const ult = [...grupo.rows].sort((a,b) => (parseInt(a[4]) || 0) - (parseInt(b[4]) || 0));
+
+    // Se o campo semana vier como snap_id|total, ignora snapshots incompletos.
+    const totalTxt = String(ult[0]?.[2] || '').split('|').pop();
+    const total = parseInt(totalTxt);
+    if (!Number.isNaN(total) && total > 0) {
+      const indices = new Set(ult.map(r => parseInt(r[4])).filter(n => !Number.isNaN(n)));
+      if (indices.size < total) continue;
+    }
+
+    try {
+      const b64 = ult.map(r => String(r[3] || '')).join('');
+      if (!b64) continue;
+      const estado = JSON.parse(_decodeBase64Utf8(b64));
+      if (estado && estado.tipo === 'programacao_snapshot') return estado;
+    } catch(e) {
+      console.warn('Snapshot de programação inválido, tentando anterior:', e);
+    }
+  }
+  return null;
+}
+
+
+function _normalizarOrdemManualSnapshot(ordem) {
+  const out = {};
+  if (!ordem || typeof ordem !== 'object') return out;
+  Object.entries(ordem).forEach(([key, idxMap]) => {
+    if (!key || !String(key).includes('|') || !idxMap || typeof idxMap !== 'object') return;
+    const limpo = {};
+    Object.entries(idxMap).forEach(([chave, idx]) => {
+      if (!chave) return;
+      const n = parseInt(idx);
+      limpo[String(chave)] = Number.isNaN(n) ? 999 : n;
+    });
+    if (Object.keys(limpo).length) out[String(key)] = limpo;
+  });
+  return out;
+}
+
+function _aplicarOrdemManualEmPecas() {
+  const pecasMap = {};
+  PECAS.forEach(p => { pecasMap[p.chave] = p; });
+
+  Object.entries(ordemManual || {}).forEach(([key, idxMap]) => {
+    const [setor, sem] = String(key).split('|');
+    if (!setor || !sem || !idxMap) return;
+
+    Object.keys(idxMap).forEach(chave => {
+      const p = pecasMap[chave];
+      if (!p) return;
+      const temPrev = p.prevs[setor] !== undefined;
+      const concluida = p.etapas[setor] === 'OK';
+      if (temPrev && !concluida) p.prevs[setor] = sem;
+
+      if (AGRUPA_SETORES.has(setor) && p.codigo) {
+        PECAS.forEach(pp => {
+          if (pp.codigo === p.codigo) {
+            const temPrevPP = pp.prevs[setor] !== undefined;
+            const concluidaPP = pp.etapas[setor] === 'OK';
+            if (temPrevPP && !concluidaPP) pp.prevs[setor] = sem;
+          }
+        });
+      }
+    });
+  });
+}
+
+function _aplicarSnapshotProgramacao(estado) {
+  ordemManual = _normalizarOrdemManualSnapshot(estado.ordem_manual || estado.ordemManual || {});
+  _aplicarOrdemManualEmPecas();
+
+  const pecasExistentes = new Set(PECAS.map(p => p.chave));
+  cargas = (estado.cargas || [])
+    .filter(c => c && c.id && (c.forno || (Array.isArray(c.fornos) && c.fornos.length)) && c.semana && c.liga)
+    .map(c => normalizarCarga({
+      id: String(c.id),
+      forno: String(c.forno || ''),
+      fornos: Array.isArray(c.fornos) ? c.fornos.map(x => String(x)) : (c.forno ? [String(c.forno)] : []),
+      semana: String(c.semana),
+      liga: String(c.liga),
+      pecas: Array.from(new Set((c.pecas || []).map(x => String(x)).filter(ch => ch && pecasExistentes.has(ch))))
+    }));
+}
+
+function _aplicarProgramacaoLegado(rows) {
+  const pecasMap = {};
+  PECAS.forEach(p => { pecasMap[p.chave] = p; });
+  const rowsProg = _filtrarUltimoSnapshotRows(rows, 5);
+  rowsProg.forEach(row => {
+    // [timestamp, setor, semana, chave, ordem_idx]
+    const setor = String(row[1] || '').trim();
+    if (setor === PROGRAMACAO_SNAPSHOT_MARKER) return;
+    const sem   = String(row[2] || '').trim();
+    const chave = String(row[3] || '').trim();
+    const idx   = parseInt(row[4]);
+    if (!setor || !sem || !chave) return;
+    const p = pecasMap[chave];
+    if (p) {
+      const temPrev  = p.prevs[setor] !== undefined;
+      const concluida = p.etapas[setor] === 'OK';
+      if (temPrev && !concluida) p.prevs[setor] = sem;
+      const semRef = concluida ? (p.prevs[setor] || sem) : sem;
+      const key = `${setor}|${semRef}`;
+      if (!ordemManual[key]) ordemManual[key] = {};
+      ordemManual[key][chave] = Number.isNaN(idx) ? 999 : idx;
+      if (AGRUPA_SETORES.has(setor)) {
+        PECAS.forEach(pp => {
+          if (pp.codigo === p.codigo && pp.chave !== chave) {
+            pp.prevs[setor] = sem;
+            ordemManual[key][pp.chave] = Number.isNaN(idx) ? 999 : idx;
+          }
+        });
+      }
+    }
+  });
+}
+
 // ── Init ─────────────────────────────────────────────────────────
 async function init() {
   // 1. Buscar modelos externos atuais do Sheets
@@ -1441,45 +1743,17 @@ async function init() {
     }
   } catch(e) { console.warn('Modelos externos:', e); }
 
-  // 2. Buscar programação (ordem/semanas) do Sheets
+  // 2. Buscar programação do Sheets
   try {
     const r = await fetch(`${APPS_URL}?tipo=programacao_setores`);
     const j = await r.json();
     if (j.success && j.data && j.data.length > 0) {
-      const pecasMap = {};
-      PECAS.forEach(p => { pecasMap[p.chave] = p; });
-      const rowsProg = _filtrarUltimoSnapshotRows(j.data, 5);
-      rowsProg.forEach(row => {
-        // [timestamp, setor, semana, chave, ordem_idx]
-        const setor = String(row[1]||'').trim();
-        const sem   = String(row[2]||'').trim();
-        const chave = String(row[3]||'').trim();
-        const idx   = parseInt(row[4]);
-        if (!setor || !sem || !chave) return;
-        const p = pecasMap[chave];
-        if (p) {
-          const temPrev  = p.prevs[setor] !== undefined;
-          const concluida = p.etapas[setor] === 'OK';
-          // Restaura semana só se tem _prev E não concluída
-          if (temPrev && !concluida) {
-            p.prevs[setor] = sem;
-          }
-          // Sempre reconstrói ordemManual (ordem independe de concluído)
-          const semRef = concluida ? (p.prevs[setor] || sem) : sem;
-          const key = `${setor}|${semRef}`;
-          if (!ordemManual[key]) ordemManual[key] = {};
-          ordemManual[key][chave] = isNaN(idx) ? 999 : idx;
-          // Propaga para peças do mesmo código nos setores agrupados
-          if (AGRUPA_SETORES.has(setor)) {
-            PECAS.forEach(pp => {
-              if (pp.codigo === p.codigo && pp.chave !== chave) {
-                pp.prevs[setor] = sem;
-                ordemManual[key][pp.chave] = isNaN(idx) ? 999 : idx;
-              }
-            });
-          }
-        }
-      });
+      const snapshot = _extrairSnapshotProgramacaoRows(j.data);
+      if (snapshot) {
+        _aplicarSnapshotProgramacao(snapshot);
+      } else {
+        _aplicarProgramacaoLegado(j.data);
+      }
     }
   } catch(e) { console.warn('Programacao:', e); }
 

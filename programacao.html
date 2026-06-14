@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Programação Fundição — 13/06/2026 14:09</title>
+<title>Programação Fundição — 14/06/2026 11:04</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -16,6 +16,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tab{padding:.6rem 1.1rem;font-size:13px;font-weight:500;color:#5f5e5a;background:none;border:none;cursor:pointer;border-bottom:2px solid transparent}
 .tab.active{color:#185fa5;border-bottom-color:#185fa5}
 .tab-content{display:none}.tab-content.active{display:block}
+body.embed-mode .topbar, body.embed-mode > .container > .tabs{display:none}
+body.embed-mode .container{max-width:100%;padding:0}
+body.embed-mode{background:#f5f4f0}
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;align-items:center;background:#fff;padding:10px 14px;border-radius:8px;border:0.5px solid rgba(0,0,0,.1)}
 .filters label{font-size:11px;color:#5f5e5a;text-transform:uppercase;letter-spacing:.04em}
 select,input[type=text]{border:0.5px solid rgba(0,0,0,.2);border-radius:6px;padding:5px 8px;font-size:12px;background:#fff;color:#1a1a18;outline:none}
@@ -145,7 +148,13 @@ select:focus,input:focus{border-color:#185fa5}
 .seq-mini label{display:block;color:#aaa9a2;font-size:9px;text-transform:uppercase}
 .seq-mini strong{font-size:12px}
 .seq-body{padding:9px;display:grid;gap:8px;min-height:420px;background:#faf9f6}
-.seq-card{background:#fff;border:0.5px solid rgba(0,0,0,.10);border-left:4px solid #185fa5;border-radius:9px;padding:9px;cursor:pointer}
+.seq-body.drag-over{outline:2px dashed #185fa5;outline-offset:-6px;background:#eef5fc}
+.seq-card{background:#fff;border:0.5px solid rgba(0,0,0,.10);border-left:4px solid #185fa5;border-radius:9px;padding:9px;cursor:grab}
+.seq-card:active{cursor:grabbing}
+.seq-card.dragging{opacity:.38;transform:scale(.985)}
+.seq-card.drop-before{box-shadow:0 -3px 0 #185fa5}
+.seq-card.drop-after{box-shadow:0 3px 0 #185fa5}
+.seq-hint{font-size:10px;color:#888780;margin-top:5px;line-height:1.35}
 .seq-card.joint{border-left-color:#ba7517;background:#fffaf2}
 .seq-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:6px}
 .seq-num{font-size:11px;color:#5f5e5a;font-weight:700}
@@ -242,7 +251,7 @@ select:focus,input:focus{border-color:#185fa5}
   <span class="saving" id="saving-ind">
     <i class="ti ti-loader-2" style="font-size:13px"></i> Salvando...
   </span>
-  <span class="sub">Atualizado em 13/06/2026 14:09 · v2026-06-13-v6-layout-fusao-pcp</span>
+  <span class="sub">Atualizado em 14/06/2026 11:04 · v2026-06-13-v7-clean-drag-fornos</span>
 </div>
 
 <div class="container">
@@ -1364,7 +1373,8 @@ function renderSequenciamentoFornos() {
     const cards = cs.length ? cs.map((c, idx) => {
       const st = statusCarga(c);
       const conjunta = cargaFornosIds(c).length > 1;
-      return `<div class="seq-card ${conjunta ? 'joint' : ''}" onclick="abrirDetalheCarga('${c.id}')">
+      return `<div class="seq-card ${conjunta ? 'joint' : ''}" draggable="true" data-carga-id="${c.id}" data-forno-id="${f.id}"
+        ondragstart="seqDragStart(event,'${c.id}','${f.id}')" ondragend="seqDragEnd(event)" onclick="abrirDetalheCarga('${c.id}')">
         <div class="seq-top"><span class="seq-num">Corrida ${String(idx+1).padStart(2,'0')}</span><span class="fusao-tag ${st.cls}">${st.txt}</span></div>
         <div class="seq-liga">${c.liga}</div>
         <div class="seq-info">
@@ -1373,9 +1383,7 @@ function renderSequenciamentoFornos() {
           <span>${st.hint}</span>
         </div>
         <div class="seq-actions" onclick="event.stopPropagation()">
-          <button class="seq-btn" onclick="moverCargaSequencia('${c.id}', -1)">↑ subir</button>
-          <button class="seq-btn" onclick="moverCargaSequencia('${c.id}', 1)">↓ descer</button>
-          <button class="seq-btn" onclick="abrirEditarFornos('${c.id}')">forno</button>
+          <button class="seq-btn" onclick="abrirEditarFornos('${c.id}')">alterar forno</button>
         </div>
       </div>`;
     }).join('') : '<div class="fusao-empty">Sem carga neste forno</div>';
@@ -1386,8 +1394,9 @@ function renderSequenciamentoFornos() {
           <div class="seq-mini"><label>Planejado</label><strong>${tonFmt(peso)}</strong></div>
           <div class="seq-mini"><label>Cargas</label><strong>${cs.length}</strong></div>
         </div>
+        <div class="seq-hint">Arraste as cargas para alterar a prioridade das corridas.</div>
       </div>
-      <div class="seq-body">${cards}</div>
+      <div class="seq-body" data-forno-id="${f.id}" ondragover="seqDragOver(event,'${f.id}')" ondrop="seqDrop(event,'${f.id}')" ondragleave="seqDragLeave(event)">${cards}</div>
     </div>`;
   }).join('');
 
@@ -1436,20 +1445,120 @@ function renderPendentesFusao() {
     </div>`;
 }
 
+let seqDrag = null;
+
+function _cargasDoFornoOrdenadas(fornoId) {
+  return cargasFusaoFiltro()
+    .filter(c => cargaFornosIds(c).includes(fornoId) && buscaMatchFusaoCarga(c));
+}
+
+function seqDragStart(ev, cargaId, fornoId) {
+  seqDrag = { cargaId, fornoId };
+  ev.dataTransfer.effectAllowed = 'move';
+  try { ev.dataTransfer.setData('text/plain', cargaId); } catch(e) {}
+  const el = ev.currentTarget;
+  setTimeout(() => el?.classList.add('dragging'), 0);
+}
+
+function seqDragEnd(ev) {
+  document.querySelectorAll('.seq-card.dragging,.seq-card.drop-before,.seq-card.drop-after').forEach(el => {
+    el.classList.remove('dragging','drop-before','drop-after');
+  });
+  document.querySelectorAll('.seq-body.drag-over').forEach(el => el.classList.remove('drag-over'));
+  seqDrag = null;
+}
+
+function _seqDropInfo(ev, fornoId) {
+  const body = ev.currentTarget.closest ? ev.currentTarget.closest('.seq-body') : ev.currentTarget;
+  const targetCard = ev.target.closest ? ev.target.closest('.seq-card[data-carga-id]') : null;
+  const cards = Array.from((body || document).querySelectorAll('.seq-card[data-carga-id]'));
+  if (!targetCard) return { beforeId: null, afterLast: true };
+  const rect = targetCard.getBoundingClientRect();
+  const before = ev.clientY < rect.top + rect.height / 2;
+  return { beforeId: before ? targetCard.dataset.cargaId : null, afterId: before ? null : targetCard.dataset.cargaId, afterLast: false };
+}
+
+function seqDragOver(ev, fornoId) {
+  if (!seqDrag || seqDrag.fornoId !== fornoId) return;
+  ev.preventDefault();
+  ev.dataTransfer.dropEffect = 'move';
+  const body = ev.currentTarget;
+  body.classList.add('drag-over');
+  document.querySelectorAll('.seq-card.drop-before,.seq-card.drop-after').forEach(el => el.classList.remove('drop-before','drop-after'));
+  const targetCard = ev.target.closest ? ev.target.closest('.seq-card[data-carga-id]') : null;
+  if (targetCard && targetCard.dataset.cargaId !== seqDrag.cargaId) {
+    const rect = targetCard.getBoundingClientRect();
+    targetCard.classList.add(ev.clientY < rect.top + rect.height / 2 ? 'drop-before' : 'drop-after');
+  }
+}
+
+function seqDragLeave(ev) {
+  const body = ev.currentTarget;
+  if (!body.contains(ev.relatedTarget)) body.classList.remove('drag-over');
+}
+
+function seqDrop(ev, fornoId) {
+  if (!seqDrag || seqDrag.fornoId !== fornoId) return;
+  ev.preventDefault();
+  const cargaId = seqDrag.cargaId;
+  const targetCard = ev.target.closest ? ev.target.closest('.seq-card[data-carga-id]') : null;
+  let beforeId = null;
+  let afterId = null;
+
+  if (targetCard && targetCard.dataset.cargaId === cargaId) {
+    seqDragEnd(ev);
+    return;
+  }
+  if (targetCard && targetCard.dataset.cargaId !== cargaId) {
+    const rect = targetCard.getBoundingClientRect();
+    if (ev.clientY < rect.top + rect.height / 2) beforeId = targetCard.dataset.cargaId;
+    else afterId = targetCard.dataset.cargaId;
+  }
+
+  reordenarCargaNoForno(cargaId, fornoId, beforeId, afterId);
+  seqDragEnd(ev);
+  renderFusao();
+}
+
+function reordenarCargaNoForno(cargaId, fornoId, beforeId, afterId) {
+  const ordemForno = _cargasDoFornoOrdenadas(fornoId).map(c => c.id).filter(Boolean);
+  const atual = ordemForno.filter(id => id !== cargaId);
+  let pos = atual.length;
+  if (beforeId) pos = atual.indexOf(beforeId);
+  else if (afterId) pos = atual.indexOf(afterId) + 1;
+  if (pos < 0) pos = atual.length;
+  atual.splice(pos, 0, cargaId);
+
+  const setOrdenado = new Set(atual);
+  const sem = String((cargas.find(c => c.id === cargaId) || {}).semana || semFusao);
+  const nova = [];
+  const usados = new Set();
+
+  // Mantém as cargas que não pertencem a essa semana/forno na mesma posição relativa.
+  cargas.forEach(c => {
+    if (String(c.semana) === sem && setOrdenado.has(c.id)) return;
+    nova.push(c);
+  });
+
+  // Insere a nova ordem das corridas deste forno no ponto da primeira carga da semana.
+  const insertAt = Math.max(0, nova.findIndex(c => String(c.semana) === sem));
+  const ordenadas = atual.map(id => cargas.find(c => c.id === id)).filter(Boolean);
+  if (insertAt >= 0) nova.splice(insertAt, 0, ...ordenadas);
+  else nova.push(...ordenadas);
+
+  cargas = nova;
+}
+
 function moverCargaSequencia(cargaId, dir) {
+  // Compatibilidade com snapshots antigos/atalhos: a interface agora usa arrastar e soltar.
   const c = cargas.find(x => x.id === cargaId);
   if (!c) return;
-  const idsSemana = cargas.filter(x => String(x.semana) === String(c.semana)).map(x => x.id);
-  const i = idsSemana.indexOf(cargaId);
+  const fornoId = cargaFornosIds(c)[0] || c.forno;
+  const ordem = _cargasDoFornoOrdenadas(fornoId).map(x => x.id);
+  const i = ordem.indexOf(cargaId);
   const j = i + dir;
-  if (i < 0 || j < 0 || j >= idsSemana.length) return;
-  const id2 = idsSemana[j];
-  const gi = cargas.findIndex(x => x.id === cargaId);
-  const gj = cargas.findIndex(x => x.id === id2);
-  if (gi < 0 || gj < 0) return;
-  const tmp = cargas[gi];
-  cargas[gi] = cargas[gj];
-  cargas[gj] = tmp;
+  if (i < 0 || j < 0 || j >= ordem.length) return;
+  reordenarCargaNoForno(cargaId, fornoId, dir < 0 ? ordem[j] : null, dir > 0 ? ordem[j] : null);
   renderFusao();
 }
 
@@ -2136,6 +2245,11 @@ function _aplicarProgramacaoLegado(rows) {
 
 // ── Init ─────────────────────────────────────────────────────────
 async function init() {
+  const params = new URLSearchParams(window.location.search);
+  const embedMode = params.get('embed') === '1';
+  if (embedMode) document.body.classList.add('embed-mode');
+  const initialTab = params.get('tab') === 'fusao' ? 'fusao' : 'setores';
+
   // 1. Buscar modelos externos atuais do Sheets
   try {
     const r = await fetch(`${APPS_URL}?tipo=modelos_externos`);
@@ -2180,6 +2294,8 @@ async function init() {
   // Guardar estado após aplicar Sheets como referência para detectar mudanças
   PECAS.forEach(p => { p._prevOrig = Object.assign({}, p.prevs); });
   renderSetores();
+  if (initialTab === 'fusao') switchTab('fusao');
+  else switchTab('setores');
 }
 
 init();

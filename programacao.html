@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Programação Fundição — 14/06/2026 12:41</title>
+<title>Programação Fundição — 14/06/2026 12:42</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -251,7 +251,7 @@ select:focus,input:focus{border-color:#185fa5}
   <span class="saving" id="saving-ind">
     <i class="ti ti-loader-2" style="font-size:13px"></i> Salvando...
   </span>
-  <span class="sub">Atualizado em 14/06/2026 12:41 · v2026-06-13-v7-clean-drag-fornos</span>
+  <span class="sub">Atualizado em 14/06/2026 12:42 · v2026-06-13-v7-clean-drag-fornos</span>
 </div>
 
 <div class="container">
@@ -898,7 +898,7 @@ function cardHTML(p, setor) {
   const alertIcon = !concluido && alertas.length > 0
     ? `<div class="card-alert-icon" onmouseenter="showTip(event,'${tipId}')" onmouseleave="hideTip('${tipId}')">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="#ba7517"><path d="M12 2L1 21h22L12 2zm0 3.5L20.5 19h-17L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/></svg>
-        <div id="${tipId}" class="alert-tip">${alertas.join('\n')}</div>
+        <div id="${tipId}" class="alert-tip">${alertas.join('\\n')}</div>
       </div>`
     : '';
 
@@ -972,7 +972,7 @@ function cardHTMLGrupo(rep, setor, n, pesoTotal, osLista, grupo) {
   const alertIcon = !concluido && alertas.length > 0
     ? `<div class="card-alert-icon" onmouseenter="showTip(event,'${tipId}')" onmouseleave="hideTip('${tipId}')">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="#ba7517"><path d="M12 2L1 21h22L12 2zm0 3.5L20.5 19h-17L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/></svg>
-        <div id="${tipId}" class="alert-tip">${alertas.join('\n')}</div>
+        <div id="${tipId}" class="alert-tip">${alertas.join('\\n')}</div>
       </div>`
     : '';
 
@@ -1226,7 +1226,7 @@ function iniciarDrag(e) {
 
 // ── Render Fusão ─────────────────────────────────────────────────
 function normalizaBusca(txt) {
-  return String(txt || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  return String(txt || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 function buscaFusao() { return normalizaBusca(document.getElementById('fil-fusao-busca')?.value || ''); }
 function textoBuscaPeca(p) {

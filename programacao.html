@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Programação Fundição — 14/06/2026 12:53</title>
+<title>Programação Fundição — 14/06/2026 13:00</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -256,7 +256,7 @@ select:focus,input:focus{border-color:#185fa5}
   <span class="saving" id="saving-ind">
     <i class="ti ti-loader-2" style="font-size:13px"></i> Salvando...
   </span>
-  <span class="sub">Atualizado em 14/06/2026 12:53 · v2026-06-13-v7-clean-drag-fornos</span>
+  <span class="sub">Atualizado em 14/06/2026 13:00 · v2026-06-13-v7-clean-drag-fornos</span>
 </div>
 
 <div class="container">
@@ -312,7 +312,7 @@ select:focus,input:focus{border-color:#185fa5}
     <div class="fusao-page-head">
       <div>
         <h2>Programação da Fusão</h2>
-        <p>Monte as cargas, acompanhe o saldo da semana e sequencie as corridas por forno. <b style="color:#185fa5">v50 — sugestor N1+N2 ativo</b></p>
+        <p>Monte as cargas, acompanhe o saldo da semana e sequencie as corridas por forno. <b style="color:#185fa5">v51 — sugestor N1+N2 refinado com PO + histórico</b></p>
       </div>
     </div>
 
@@ -1880,22 +1880,134 @@ function _dataPrazoParaOrdenacao(p) {
   return Number(m[3] + m[2] + m[1]);
 }
 
-function _selecionarPecasParaCapacidade(pecasLiga, maxKg) {
-  const lista = [...pecasLiga].sort((a,b) => {
+function _materialFamilia(liga) {
+  const l = normalizaBusca(liga || '');
+  if (l.includes('inox') || l.includes('ca6') || l.includes('itf15')) return 'Inox';
+  if (l.includes('mang') || l.includes('mn') || l.includes('xt')) return 'Manganês';
+  if (l.includes('ferro') || l.includes('nodular') || l.includes('cinzento') || l.includes('fm') || l.includes('camisa')) return 'Ferro';
+  return 'Aço';
+}
+
+function _maxAberturasPorMaterial(liga) {
+  const fam = _materialFamilia(liga);
+  if (fam === 'Ferro') return 12;
+  if (fam === 'Inox') return 3;
+  if (fam === 'Manganês') return 5;
+  return 5; // Aço
+}
+
+function _tipoGeometriaPeca(p) {
+  const d = normalizaBusca(`${p?.desc || ''} ${p?.codigo || ''}`);
+  if (d.includes('mandib') || d.includes('concav') || d.includes('cone') || d.includes('manta') || d.includes('revest') || d.includes('segment')) return 'britador';
+  if (d.includes('caixa') || d.includes('carcaca') || d.includes('carcaça') || d.includes('tampa') || d.includes('mesa')) return 'volumosa';
+  if (d.includes('rotor') || d.includes('rodete') || d.includes('impel') || d.includes('helice')) return 'rotativa';
+  if (d.includes('camisa') || d.includes('coquilha') || d.includes('lingoteira')) return 'camisa';
+  return 'geral';
+}
+
+function _faixaPesoPeca(p) {
+  const w = pesoPeca(p);
+  if (w >= 5000) return 'muito_pesada';
+  if (w >= 2500) return 'pesada';
+  if (w >= 900) return 'media';
+  return 'leve';
+}
+
+function _bucketPlanejamentoPeca(p) {
+  // Proxy de válvula/roteiro: quando não temos a válvula no banco, usamos peça repetida,
+  // geometria e faixa de peso. Isso evita montar carga só por kg.
+  const cod = String(p?.codigo || '').trim();
+  const liga = String(p?.liga || '').trim();
+  if (cod) return `${liga}|COD|${cod}`;
+  return `${liga}|${_tipoGeometriaPeca(p)}|${_faixaPesoPeca(p)}`;
+}
+
+function _chaveCodigoPeca(p) {
+  return String(p?.codigo || p?.chave || '').trim();
+}
+
+function _historicoCodigoLiga(liga) {
+  const hist = {};
+  (cargas || []).forEach(c => {
+    c = normalizarCarga(c || {});
+    if (!c.liga || c.liga !== liga) return;
+    if (String(c.semana || '') === String(semFusao || '')) return;
+    const ids = cargaFornosIds(c);
+    const keyCombo = _comboKey(ids);
+    const ps = pecasDaCarga(c);
+    ps.forEach(p => {
+      const cod = _chaveCodigoPeca(p);
+      if (!cod) return;
+      if (!hist[cod]) hist[cod] = { total:0, combos:{}, cargaPesos:[], qtdAberturas:[] };
+      hist[cod].total += 1;
+      hist[cod].combos[keyCombo] = (hist[cod].combos[keyCombo] || 0) + 1;
+      hist[cod].cargaPesos.push(totalCarga(c));
+      hist[cod].qtdAberturas.push((c.pecas || []).length);
+    });
+  });
+  return hist;
+}
+
+function _comboHistoricoPreferidoCodigo(cod, histCodigo) {
+  const h = histCodigo?.[cod];
+  if (!h || !h.combos) return '';
+  return Object.entries(h.combos).sort((a,b)=>b[1]-a[1])[0]?.[0] || '';
+}
+
+function _agruparPecasParaSugestao(pecasLiga, liga, histCodigo) {
+  const groups = {};
+  pecasLiga.forEach(p => {
+    const key = _bucketPlanejamentoPeca(p);
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(p);
+  });
+  return Object.values(groups).sort((ga, gb) => {
+    const a = ga[0], b = gb[0];
+    const ha = histCodigo[_chaveCodigoPeca(a)]?.total || 0;
+    const hb = histCodigo[_chaveCodigoPeca(b)]?.total || 0;
+    if (ha !== hb) return hb - ha; // peças repetidas/históricas primeiro
     const pa = _dataPrazoParaOrdenacao(a), pb = _dataPrazoParaOrdenacao(b);
     if (pa !== pb) return pa - pb;
-    return pesoPeca(b) - pesoPeca(a);
+    return pesoTotalPecas(gb) - pesoTotalPecas(ga);
   });
+}
+
+function _selecionarPecasParaCapacidade(pecasLiga, maxKg, liga, histCodigo, comboKeyAlvo) {
+  const maxAberturas = _maxAberturasPorMaterial(liga);
+  const grupos = _agruparPecasParaSugestao(pecasLiga, liga, histCodigo);
   const sel = [];
   let total = 0;
-  lista.forEach(p => {
-    const w = pesoPeca(p);
-    if (!w) return;
-    if (total + w <= maxKg || sel.length === 0) {
-      sel.push(p);
-      total += w;
-    }
+
+  // Prioriza grupos cujo código já foi fundido historicamente no mesmo combo de forno.
+  grupos.sort((ga, gb) => {
+    const ca = _chaveCodigoPeca(ga[0]), cb = _chaveCodigoPeca(gb[0]);
+    const pa = _comboHistoricoPreferidoCodigo(ca, histCodigo) === comboKeyAlvo ? 1 : 0;
+    const pb = _comboHistoricoPreferidoCodigo(cb, histCodigo) === comboKeyAlvo ? 1 : 0;
+    if (pa !== pb) return pb - pa;
+    return 0;
   });
+
+  for (const grupo of grupos) {
+    const ordenado = [...grupo].sort((a,b) => {
+      const pa = _dataPrazoParaOrdenacao(a), pb = _dataPrazoParaOrdenacao(b);
+      if (pa !== pb) return pa - pb;
+      return pesoPeca(b) - pesoPeca(a);
+    });
+
+    for (const p of ordenado) {
+      const w = pesoPeca(p);
+      if (!w) continue;
+      const volumosaBaixoPeso = _tipoGeometriaPeca(p) !== 'geral' && w < 1200;
+      const limiteAberturas = volumosaBaixoPeso ? Math.min(maxAberturas, 3) : maxAberturas;
+      if (sel.length >= limiteAberturas) continue;
+      if (total + w <= maxKg || sel.length === 0) {
+        sel.push(p);
+        total += w;
+      }
+    }
+    // Para manganês/peças de britador, tenta manter repetidas juntas, mas evita misturar demais.
+    if (_materialFamilia(liga) === 'Manganês' && sel.length >= Math.min(maxAberturas, 5) && total >= maxKg * 0.65) break;
+  }
   return sel;
 }
 
@@ -1914,24 +2026,32 @@ function gerarSugestaoFusaoN1N2() {
     let restantes = [...pecasLigaOrig].filter(p => pesoPeca(p) > 0);
     const semPeso = pecasLigaOrig.filter(p => !pesoPeca(p));
     const perfil = _perfilHistoricoLiga(liga);
+    const histCodigo = _historicoCodigoLiga(liga);
+    const maxAberturas = _maxAberturasPorMaterial(liga);
 
     while (restantes.length) {
       const pesoRestante = pesoTotalPecas(restantes);
       const melhor = _melhorComboParaSaldo(liga, pesoRestante, perfil);
       if (!melhor) break;
-      const selecionadas = _selecionarPecasParaCapacidade(restantes, melhor.cap.max);
+      const comboKeyAlvo = _comboKey(melhor.ids);
+      const selecionadas = _selecionarPecasParaCapacidade(restantes, melhor.cap.max, liga, histCodigo, comboKeyAlvo);
       if (!selecionadas.length) break;
       const chaves = new Set(selecionadas.map(p => p.chave));
       const peso = pesoTotalPecas(selecionadas);
       const dentro = peso >= melhor.cap.min && peso <= melhor.cap.max;
       const histKey = _comboKey(melhor.ids);
       const histFreq = perfil.combos[histKey] || 0;
+      const qtdAberturas = selecionadas.length;
+      const codigosHistoricos = selecionadas.filter(p => histCodigo[_chaveCodigoPeca(p)]?.total).length;
       const confianca = Math.max(35, Math.min(96,
-        Math.round((dentro ? 55 : 25) + (histFreq ? 25 : 0) + Math.min(16, (peso / melhor.cap.max) * 16))
+        Math.round((dentro ? 48 : 22) + (histFreq ? 20 : 0) + (codigosHistoricos ? 14 : 0) + (qtdAberturas <= maxAberturas ? 8 : -12) + Math.min(10, (peso / melhor.cap.max) * 10))
       ));
       let motivo = dentro ? 'Dentro da faixa do forno' : (peso < melhor.cap.min ? 'Abaixo do mínimo — revisar sobra da liga' : 'Acima do máximo — revisar manualmente');
       if (histFreq) motivo += ` · histórico: ${histFreq} carga(s) desta liga nesse forno/combo`;
       else motivo += ' · sem histórico direto para esse forno/combo';
+      if (codigosHistoricos) motivo += ` · ${codigosHistoricos} peça(s) com código já visto no histórico`;
+      motivo += ` · abertura: ${qtdAberturas}/${maxAberturas} ${_materialFamilia(liga)}`;
+      if (selecionadas.some(p => _tipoGeometriaPeca(p) !== 'geral' && pesoPeca(p) < 1200)) motivo += ' · atenção: peça volumosa/baixo peso, revisar válvula/roteiro';
 
       sugestoes.push(normalizarCarga({
         id: 'sug_' + Date.now() + '_' + String(seq++).padStart(2,'0'),

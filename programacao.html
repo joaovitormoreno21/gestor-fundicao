@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Programação Fundição — 14/06/2026 13:00</title>
+<title>Programação Fundição — 14/06/2026 13:11</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -256,7 +256,7 @@ select:focus,input:focus{border-color:#185fa5}
   <span class="saving" id="saving-ind">
     <i class="ti ti-loader-2" style="font-size:13px"></i> Salvando...
   </span>
-  <span class="sub">Atualizado em 14/06/2026 13:00 · v2026-06-13-v7-clean-drag-fornos</span>
+  <span class="sub">Atualizado em 14/06/2026 13:11 · v2026-06-13-v7-clean-drag-fornos</span>
 </div>
 
 <div class="container">
@@ -312,7 +312,6 @@ select:focus,input:focus{border-color:#185fa5}
     <div class="fusao-page-head">
       <div>
         <h2>Programação da Fusão</h2>
-        <p>Monte as cargas, acompanhe o saldo da semana e sequencie as corridas por forno. <b style="color:#185fa5">v51 — sugestor N1+N2 refinado com PO + histórico</b></p>
       </div>
     </div>
 
@@ -348,17 +347,6 @@ select:focus,input:focus{border-color:#185fa5}
     </div>
 
     <div id="fusao-resumo" class="fusao-resumo-grid"></div>
-
-    <div class="fusao-suggest-bar">
-      <div class="txt">
-        <strong>✨ Sugestão automática de formação de carga</strong>
-        Gera um rascunho usando N1 capacidade dos fornos + N2 histórico por liga/forno. Não salva automaticamente.
-      </div>
-      <button class="btn btn-suggest" onclick="abrirSugestaoFusao()">
-        <i class="ti ti-sparkles" style="font-size:13px"></i> Sugerir Cargas da Semana
-      </button>
-    </div>
-
     <div class="fusao-subtabs">
       <button id="fusao-subtab-montar" class="fusao-subtab active" onclick="switchFusaoView('montar')">
         <i class="ti ti-stack-push"></i> Montar Cargas
